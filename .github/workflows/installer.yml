@@ -1,0 +1,48 @@
+name: installer
+
+# Compiles the styled Windows installer (EmailNotesSetup.exe) on a real Windows
+# runner and uploads it. On a published release it is also attached as an asset.
+# Download it from the run's "Artifacts" section.
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/make-installer-art.mjs
+      - name: Stamp production manifest
+        run: node scripts/build-manifest.mjs
+        env:
+          PUBLIC_URL: https://pixelschmied.github.io/Outlook-Notes
+
+      - name: Install Inno Setup
+        run: choco install innosetup --version=6.3.3 -y --no-progress
+
+      - name: Compile installer
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\EmailNotes.iss'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EmailNotesSetup
+          path: installer/Output/EmailNotesSetup.exe
+          if-no-files-found: error
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/EmailNotesSetup.exe

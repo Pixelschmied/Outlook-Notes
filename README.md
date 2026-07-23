@@ -7,205 +7,209 @@ Paste screenshots and attach files straight into the note. Nothing ever leaves
 your device.
 
 This is the "email notes" idea from the internal Pixel-App, rebuilt as a proper,
-standalone **Office Web Add-in** so it lives inside Outlook itself instead of a
-separate window.
+standalone **Office add-in** so it lives inside Outlook itself.
 
 > **Independent, open-source project.** Not affiliated with, endorsed by, or
 > sponsored by Microsoft. See [Legal & Microsoft compliance](#legal--microsoft-compliance).
 
 ---
 
+## Install (one click, no Node, no dev tools)
+
+1. **Download `EmailNotesSetup.exe`** from the
+   [latest release](https://github.com/Pixelschmied/Outlook-Notes/releases).
+2. **Run it.** No administrator rights are needed — it installs just for you.
+   (Windows SmartScreen may warn about an unknown publisher because the
+   installer isn't code-signed yet; choose **More info → Run anyway**. See
+   [Code signing](#code-signing).)
+3. **Restart Outlook.** Open any mail, click **Notes** on the ribbon, and click
+   the **pin** icon so the pane stays docked while you browse your inbox.
+
+That's it — no Node.js, no commands, no local server. The installer registers
+the add-in with Outlook; the add-in's code is served over HTTPS from this
+project's GitHub Pages site (your notes are **not** — they stay on your PC).
+
+To remove it: uninstall **Email Notes** from *Windows Settings → Apps*, then
+restart Outlook.
+
 ## What it does
 
 - 📌 **Docks next to the mail.** A pinnable task pane on the message-read
-  surface. Pin it once and it stays open, automatically switching to the note
-  for whichever mail you select.
-- 🔗 **One note per mail, by a stable ID.** Each mail is matched to its note
-  through the mail's own `internetMessageId` (the RFC 5322 Message-ID). That id
-  never changes when a mail is moved between folders, so a mail always resolves
-  back to the same note. Notes are numbered sequentially for a friendly label
-  (`Note #1`, `Note #2`, …) — see [How the linking works](#how-the-linking-works).
+  surface that automatically switches to the note for whichever mail you select.
+- 🔗 **One note per mail, by a stable ID.** Each mail is matched to its note via
+  the mail's `internetMessageId`, which never changes when a mail is moved
+  between folders. See [How the linking works](#how-the-linking-works).
 - 📋 **Paste screenshots.** `Ctrl+V` an image into the note (or use **Paste
-  screenshot**) and it's stored as an attachment, with a small `[📎 name]`
-  reference dropped into the text — exactly like the Pixel-App.
+  screenshot**) and it's stored as an attachment, with a `[📎 name]` reference
+  dropped into the text — exactly like the Pixel-App.
 - 📎 **Attach files.** Pick any file(s); they're kept with the note.
 - ✏️ **Manage attachments.** Open, rename, remove, and copy images back to the
   clipboard.
 - 💾 **Autosave.** Typing is saved automatically (and immediately when you
   switch mails or hide the pane).
-- 🔒 **Fully local & offline.** All notes and attachments live in the browser's
-  IndexedDB inside the add-in. There is no server, no account, no cloud.
+- 🔒 **Fully local & offline.** All notes and attachments live in the add-in's
+  local storage. There is no server, no account, no cloud.
 
 ## How the linking works
 
-The requirement is simple: *every mail must be linked to a note by a unique id —
-Mail 1 = Note 1, Mail 2 = Note 2, …*. Here's how that's implemented:
+The rule is simple: *every mail is linked to a note by a unique id — Mail 1 =
+Note 1, Mail 2 = Note 2, …*. Implementation:
 
-1. When you select a mail, the add-in reads a **stable mail key**. It prefers
-   `internetMessageId` (globally unique, survives folder moves and restarts) and
-   falls back to the item id / conversation id if that isn't available.
-2. A local registry maps `mailKey → noteId`. The **first** time a mail is seen,
-   it's assigned the **next sequential number**. That mapping is permanent, so
-   the mail always reopens the same note.
-3. The note (text + attachment metadata) is stored under that `noteId`, and
-   attachment blobs are stored alongside it.
+1. When you select a mail, the add-in reads a **stable mail key** — preferring
+   `internetMessageId` (globally unique, survives folder moves and restarts),
+   falling back to the item id / conversation id.
+2. A local registry maps `mailKey → noteId`. The **first** time a mail is seen
+   it's assigned the **next sequential number**, permanently — so the mail
+   always reopens the same note.
+3. The note text and attachments are stored under that `noteId`.
 
-Because the number is assigned on first use, "Mail 1 = Note 1" means *the first
-mail you actually take notes on* becomes Note 1 — not a fixed position in your
-inbox.
+"Mail 1 = Note 1" means *the first mail you actually take notes on* becomes
+Note 1 — not a fixed position in your inbox.
 
-## Architecture
+## Privacy & data
 
-```
-┌───────────────────────────── Outlook (classic desktop) ─────────────────────────────┐
-│                                                                                      │
-│   Reading pane / message           ┌── Task pane (this add-in) ──────────────────┐   │
-│   ┌──────────────────────┐         │  Email Notes            🟢 Mail selected    │   │
-│   │  From: …             │         │  ┌─────────────────────────────────────┐    │   │
-│   │  Subject: …          │  <────  │  │ Note #1   Subject   from Sender      │    │   │
-│   │  Body …              │         │  │ [ Paste screenshot ] [ Attach file ] │    │   │
-│   │                      │         │  │ ┌─────────────────────────────────┐  │    │   │
-│   └──────────────────────┘         │  │ │ note text … [📎 1.png]          │  │    │   │
-│                                    │  │ └─────────────────────────────────┘  │    │   │
-│                                    │  │ 🖼 1.png  ✏ 📋 ✕                      │    │   │
-│                                    │  └─────────────────────────────────────┘    │   │
-│                                    └─────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────────────────────┘
-        Office.js (from Microsoft CDN)  ──►  IndexedDB (local, on your machine)
-```
+- **Everything stays on your device.** Notes and attachments are stored in the
+  add-in's local IndexedDB. There is no backend, and the add-in makes no network
+  calls of its own.
+- The only external resource loaded is **office.js from Microsoft's CDN**, which
+  every Office add-in requires.
+- The add-in requests the minimum permission, **`ReadItem`**: it reads the
+  selected mail's id, subject, and sender to link and label the note. It does
+  **not** modify, move, send, or delete your mail.
+- Storage is local to the machine and Outlook profile, so notes are not synced
+  across devices.
 
-- **`src/core/`** — storage and logic, framework-free:
-  - `db.ts` — IndexedDB stores (`meta`, `mailMap`, `notes`, `blobs`) and the
-    sequential-ID registry.
-  - `mail.ts` — derives the stable mail key from the selected Office item.
-  - `attachments.ts` — attachment naming, `[📎 name]` tokens, kinds.
-  - `types.ts` — shared types.
-- **`src/taskpane/`** — the notepad UI (vanilla TypeScript, no framework) that
-  binds to the selected mail and reacts to Office's `ItemChanged` event.
-- **`src/commands/`** — the ribbon function file.
-- **`manifest.xml`** — the Office add-in manifest.
+## Legal & Microsoft compliance
 
-Office.js is always loaded from Microsoft's official CDN at runtime; it is never
-bundled or redistributed by this project.
+Built to follow Microsoft's rules for Office/Outlook add-ins:
 
-## Requirements
+- Uses the **official Office Add-ins platform** and a standard add-in manifest —
+  the supported, documented way to extend Outlook.
+- **office.js is loaded from the official Microsoft CDN**, never bundled or
+  repackaged.
+- **All add-in resource URLs are HTTPS.**
+- Requests the **least privilege** it needs (`ReadItem`).
+- **Installer footprint is minimal and per-user:** it writes only to your own
+  user profile — one value under `HKCU\Software\Microsoft\Office\16.0\WEF\Developer`
+  (Microsoft's documented Windows sideloading location) plus a copy of the
+  manifest in `%LOCALAPPDATA%`. No system files, no admin rights, fully removed
+  on uninstall.
+- **Trademarks.** "Microsoft", "Outlook", and "Office" are trademarks of
+  Microsoft Corporation. This is an **independent, unofficial** add-in and is
+  **not affiliated with, endorsed by, or sponsored by Microsoft**. The product
+  name ("Email Notes") uses no Microsoft brand names, and the icons are original.
 
-- Classic Outlook for Windows (desktop), Microsoft 365 / Exchange account.
-  Web add-ins also load in new Outlook and Outlook on the web.
-- The add-in needs the **Mailbox 1.5** requirement set (add-in commands + task
-  pane pinning), which classic Outlook has supported for years.
-- [Node.js](https://nodejs.org/) 18+ to build.
+### Code signing
 
-## Getting started (development)
+The installer is currently **unsigned**, so Windows SmartScreen shows an
+"unknown publisher" prompt (**More info → Run anyway** to proceed). This is
+expected for an open-source project and does not mean the software is unsafe —
+you can review every line here and build it yourself. For wide distribution,
+sign `EmailNotesSetup.exe` with an Authenticode certificate.
+
+### Publishing to AppSource (optional)
+
+Listing an add-in on Microsoft AppSource requires passing Microsoft's
+[Commercial marketplace certification policies](https://learn.microsoft.com/legal/marketplace/certification-policies)
+and the
+[Office Store validation policies](https://learn.microsoft.com/office/dev/store/validation-policies).
+Sideloading or admin-deploying inside your own organization does **not** require
+certification. This repository targets self-hosting via the installer; review
+those policies before publishing.
+
+---
+
+## For maintainers: one-time setup
+
+The installer points the add-in at this project's GitHub Pages site, so the
+static files must be published once:
+
+1. In the repo, go to **Settings → Pages** and set **Source: GitHub Actions**.
+2. The [`pages`](.github/workflows/pages.yml) workflow builds and deploys
+   `dist/` to `https://pixelschmied.github.io/Outlook-Notes/` on every push to
+   `main`.
+3. The [`installer`](.github/workflows/installer.yml) workflow compiles
+   `EmailNotesSetup.exe` on a Windows runner and uploads it as a build artifact;
+   on a published GitHub Release it's attached as a downloadable asset.
+
+If you host somewhere other than GitHub Pages, set `PUBLIC_URL` when building the
+manifest (`PUBLIC_URL=https://your.host npm run manifest:prod`) and update the
+same value in the two workflows.
+
+## Build from source (contributors only)
+
+You only need this if you want to **modify the add-in** — end users just run the
+installer above.
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Trust a local HTTPS certificate (Office requires HTTPS)
-npm run dev-certs
-
-# 3. Start the dev server on https://localhost:3000
-npm start
+npm run dev-certs   # trust a local HTTPS certificate (Office requires HTTPS)
+npm start           # dev server on https://localhost:3000
 ```
 
-Then **sideload** `manifest.xml` into Outlook:
-
-- **Classic Outlook (desktop):** File → Manage Add-ins / Get Add-ins → *My
-  add-ins* → *Add a custom add-in* → *Add from file…* → pick `manifest.xml`.
-- Or use Microsoft's
-  [sideloading instructions](https://learn.microsoft.com/office/dev/add-ins/outlook/sideload-outlook-add-ins-for-testing).
-
-Open a mail, click **Notes** on the ribbon, and **pin** the pane (the pin icon
-in the task pane header) so it stays open as you move between mails.
-
-### Useful scripts
+Then sideload the dev `manifest.xml` (which points at `https://localhost:3000`)
+into Outlook: *File → Get Add-ins → My add-ins → Add a custom add-in → Add from
+file…*. See Microsoft's
+[sideloading guide](https://learn.microsoft.com/office/dev/add-ins/outlook/sideload-outlook-add-ins-for-testing).
 
 | Script | What it does |
 | --- | --- |
 | `npm start` | Dev server with hot reload on `https://localhost:3000` |
 | `npm run build` | Production build into `dist/` |
-| `npm run typecheck` | TypeScript type-check only |
-| `npm run validate` | Validate `manifest.xml` (uses Microsoft's online validator) |
+| `npm run typecheck` | TypeScript type-check |
+| `npm run manifest:prod` | Write `dist/manifest.xml` for your `PUBLIC_URL` host |
+| `npm run validate` | Validate `manifest.xml` (Microsoft's online validator) |
 | `npm run make-icons` | Regenerate the PNG icons in `assets/` |
+| `npm run make-installer-art` | Regenerate the installer artwork + `app.ico` |
 
-## Deploying for real use
+Building the installer locally (on Windows) needs
+[Inno Setup 6+](https://jrsoftware.org/isinfo.php):
 
-The manifest points at `https://localhost:3000` for development. To use the
-add-in day-to-day, host the built `dist/` folder on any HTTPS static host (for
-example GitHub Pages) and replace every `https://localhost:3000` occurrence in
-`manifest.xml` with your hosting URL. Then sideload the updated manifest, or have
-a Microsoft 365 admin deploy it centrally via
-[Integrated Apps](https://learn.microsoft.com/microsoft-365/admin/manage/test-and-deploy-microsoft-365-apps).
-
-## Privacy & data
-
-- **Everything stays on your device.** Notes and attachments are stored in the
-  add-in's local IndexedDB. There is no backend and the add-in makes no network
-  calls of its own.
-- The only external resource loaded is **office.js from Microsoft's CDN**, which
-  is required for any Office add-in to function.
-- The add-in requests the minimum permission, **`ReadItem`**: it reads the
-  selected mail's id, subject, and sender to link and label the note. It does
-  **not** modify, move, send, or delete your mail.
-- Because storage is local to the machine and Outlook profile, notes are not
-  synced across devices. Clearing the add-in's data or the Outlook cache removes
-  them.
-
-## Legal & Microsoft compliance
-
-This project is built to follow Microsoft's rules for Office/Outlook add-ins:
-
-- It uses the **official Office Add-ins platform** and a standard add-in
-  manifest — the supported, documented way to extend Outlook.
-- **office.js is loaded from the official Microsoft CDN** and never bundled or
-  repackaged, as Microsoft requires.
-- **All add-in resource URLs are HTTPS**, per Microsoft's requirements.
-- It requests the **least privilege** it needs (`ReadItem`).
-- **Trademarks.** "Microsoft", "Outlook", "Office", and related names are
-  trademarks of Microsoft Corporation. This project is an **independent,
-  unofficial** add-in and is **not affiliated with, endorsed by, or sponsored
-  by Microsoft**. The product name ("Email Notes") does not use Microsoft brand
-  names, and the icons are original.
-- **Publishing to AppSource** (optional): listing an add-in on Microsoft
-  AppSource requires passing Microsoft's
-  [Commercial marketplace certification policies](https://learn.microsoft.com/legal/marketplace/certification-policies)
-  and the
-  [Office Store validation policies](https://learn.microsoft.com/office/dev/store/validation-policies).
-  Sideloading or admin-deploying the add-in inside your own organization does
-  not require certification. This repository targets self-hosting/sideloading;
-  anyone wishing to publish it should review those policies first.
-
-If you believe anything here conflicts with Microsoft's current requirements,
-please open an issue.
+```bash
+npm run build
+npm run make-installer-art
+npm run manifest:prod
+ISCC installer\EmailNotes.iss   # → installer\Output\EmailNotesSetup.exe
+```
 
 ## Project structure
 
 ```
 Outlook-Notes/
-├─ manifest.xml            # Office add-in manifest (pinnable task pane, MessageRead)
-├─ assets/                 # Generated PNG icons (see scripts/make-icons.mjs)
-├─ scripts/make-icons.mjs  # Reproducible icon generator (no image libraries)
+├─ manifest.xml               # Dev manifest (localhost); prod copy is stamped into dist/
+├─ assets/                    # Generated PNG icons + app.ico
+├─ installer/
+│  ├─ EmailNotes.iss          # Inno Setup script (per-user sideload registration)
+│  ├─ after.txt               # Post-install instructions shown in the wizard
+│  └─ wizard-*.bmp            # Generated wizard artwork
+├─ scripts/
+│  ├─ make-icons.mjs          # Icon generator (no image libraries)
+│  ├─ make-installer-art.mjs  # Installer artwork + .ico generator
+│  └─ build-manifest.mjs      # Stamps the public host into dist/manifest.xml
 ├─ src/
-│  ├─ core/                # Storage + logic (db, mail key, attachments, types)
-│  ├─ taskpane/            # Notepad UI (HTML/CSS/TS)
-│  └─ commands/            # Ribbon function file
-├─ webpack.config.js
-├─ tsconfig.json
-└─ package.json
+│  ├─ core/                   # Storage + logic (db, mail key, attachments, types)
+│  ├─ taskpane/               # Notepad UI (HTML/CSS/TS)
+│  └─ commands/               # Ribbon function file
+└─ .github/workflows/         # build, pages (host), installer (.exe)
 ```
+
+## Requirements
+
+- Classic Outlook for Windows (desktop), Microsoft 365 / Exchange account.
+- Mailbox **1.5** requirement set (add-in commands + task-pane pinning), which
+  classic Outlook has supported for years.
 
 ## Not included (yet)
 
-To keep this a clean, standalone open-source add-in, the Pixel-App's
-integrations (GitLab issues, the shared To-Do board) are intentionally left out —
-they depend on that app's own backend. The core email-notes experience
-(per-mail notes, sequential linking, screenshots, attachments) is complete.
+To keep this a clean standalone add-in, the Pixel-App's integrations (GitLab
+issues, the shared To-Do board) are intentionally left out — they depend on that
+app's own backend. The core email-notes experience (per-mail notes, sequential
+linking, screenshots, attachments) is complete.
 
 ## Contributing
 
-Issues and pull requests are welcome. Please keep documentation in English and
-run `npm run typecheck` and `npm run build` before submitting.
+Issues and pull requests welcome. Please keep documentation in English and run
+`npm run typecheck` and `npm run build` before submitting.
 
 ## License
 

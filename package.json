@@ -19,6 +19,8 @@
   ],
   "scripts": {
     "make-icons": "node scripts/make-icons.mjs",
+    "make-installer-art": "node scripts/make-installer-art.mjs",
+    "manifest:prod": "node scripts/build-manifest.mjs",
     "typecheck": "tsc --noEmit",
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",

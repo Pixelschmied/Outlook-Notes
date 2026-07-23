@@ -1,5 +1,6 @@
 node_modules/
 dist/
+installer/Output/
 *.log
 npm-debug.log*
 .DS_Store
