@@ -1,15 +1,20 @@
 name: installer
 
 # Compiles the styled Windows installer (EmailNotesSetup.exe) on a real Windows
-# runner and uploads it. On a published release it is also attached as an asset.
-# Download it from the run's "Artifacts" section.
+# runner. Every push uploads it as a build artifact. Pushing a version tag
+# (e.g. v0.1.0) also creates a GitHub Release with the installer attached for
+# easy download.
 
 on:
   push:
     branches: ['**']
+    tags: ['v*']
   workflow_dispatch:
   release:
     types: [published]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -50,8 +55,24 @@ jobs:
           path: installer/Output/EmailNotesSetup.exe
           if-no-files-found: error
 
-      - name: Attach to release
-        if: github.event_name == 'release'
+      # On a version tag (or a manually published release), create/update the
+      # GitHub Release and attach the installer as a downloadable asset.
+      - name: Publish release with installer
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
+          name: Email Notes ${{ github.ref_name }}
           files: installer/Output/EmailNotesSetup.exe
+          body: |
+            **Email Notes for Outlook** — a private notepad docked next to each mail.
+
+            ### Install
+            1. Download **EmailNotesSetup.exe** below.
+            2. Run it (no admin needed). Windows SmartScreen may warn about an
+               unknown publisher — choose **More info → Run anyway** (the installer
+               is not code-signed).
+            3. Restart Outlook, open a mail, click **Notes** on the ribbon, and pin
+               the pane.
+
+            Notes and screenshots stay on your device. See the
+            [README](https://github.com/Pixelschmied/Outlook-Notes#readme) for details.
