@@ -1,15 +1,28 @@
 name: installer
 
 # Compiles the styled Windows installer (EmailNotesSetup.exe) on a real Windows
-# runner. Every push uploads it as a build artifact. Pushing a version tag
-# (e.g. v0.1.0) also creates a GitHub Release with the installer attached for
-# easy download.
+# runner. Every push uploads it as a build artifact.
+#
+# A GitHub Release with the installer attached is created either by:
+#   * pushing a version tag (e.g. v0.1.0), or
+#   * running this workflow manually (Actions -> installer -> "Run workflow"),
+#     which lets the workflow's own token create the tag + release. This is what
+#     allows the release to be cut without pushing a tag by hand.
 
 on:
   push:
     branches: ['**']
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create/update a GitHub Release with the installer'
+        type: boolean
+        default: true
+      version:
+        description: 'Release tag, e.g. v0.1.1 (blank = version from package.json)'
+        type: string
+        default: ''
   release:
     types: [published]
 
@@ -55,13 +68,38 @@ jobs:
           path: installer/Output/EmailNotesSetup.exe
           if-no-files-found: error
 
-      # On a version tag (or a manually published release), create/update the
-      # GitHub Release and attach the installer as a downloadable asset.
+      # Work out the release tag: explicit input, else the pushed tag, else the
+      # version from package.json (prefixed with "v").
+      - name: Resolve release tag
+        id: ver
+        shell: pwsh
+        run: |
+          $v = "${{ github.event.inputs.version }}"
+          if ([string]::IsNullOrWhiteSpace($v)) {
+            if ("${{ github.ref_type }}" -eq "tag") {
+              $v = "${{ github.ref_name }}"
+            } else {
+              $pkg = Get-Content package.json -Raw | ConvertFrom-Json
+              $v = "v$($pkg.version)"
+            }
+          }
+          "tag=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Release tag: $v"
+
+      # Create/update the Release and attach the installer. On a manual run the
+      # workflow's token creates the tag itself, so no hand-pushed tag is needed.
       - name: Publish release with installer
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
+        if: >-
+          github.event_name == 'release' ||
+          github.ref_type == 'tag' ||
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true')
         uses: softprops/action-gh-release@v2
         with:
-          name: Email Notes ${{ github.ref_name }}
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Email Notes ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          prerelease: false
+          make_latest: true
           files: installer/Output/EmailNotesSetup.exe
           body: |
             **Email Notes for Outlook** — a private notepad docked next to each mail.
