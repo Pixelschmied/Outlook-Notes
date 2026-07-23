@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Email Notes</title>
+    <!-- office.js is loaded from Microsoft's official CDN, never bundled. -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="taskpane.css" />
+  </head>
+  <body>
+    <main id="app" class="app">
+      <header class="head">
+        <h1>Email Notes</h1>
+        <span id="status" class="status idle">Loading…</span>
+      </header>
+
+      <!-- Shown when no mail is selected. -->
+      <section id="empty" class="card empty hidden">
+        <p>
+          Select a mail in Outlook — its own notepad appears here. The note stays
+          linked to that mail and comes back whenever you open it again. Pin this
+          pane to keep it open while you browse your inbox.
+        </p>
+      </section>
+
+      <!-- The note editor for the selected mail. -->
+      <section id="editor" class="card editor hidden">
+        <div class="mail">
+          <span id="note-badge" class="badge">Note</span>
+          <span id="subject" class="subject"></span>
+          <span id="sender" class="sender"></span>
+        </div>
+
+        <div class="actions">
+          <button id="btn-screenshot" class="btn" type="button" title="Paste an image from the clipboard as an attachment">
+            📋 Paste screenshot
+          </button>
+          <button id="btn-files" class="btn" type="button" title="Attach one or more files">
+            📎 Attach file
+          </button>
+          <span class="spacer"></span>
+          <button id="btn-export" class="btn subtle" type="button" title="Copy this note as text to the clipboard">
+            ⧉ Copy text
+          </button>
+        </div>
+
+        <textarea
+          id="note"
+          class="note"
+          placeholder="Note for this mail…  (paste a screenshot with Ctrl+V)"
+          spellcheck="false"
+        ></textarea>
+
+        <div id="attachments" class="attachments"></div>
+
+        <footer class="foot">
+          <span id="saved" class="muted">Saved automatically</span>
+        </footer>
+      </section>
+
+      <div id="toast" class="toast hidden"></div>
+    </main>
+  </body>
+</html>

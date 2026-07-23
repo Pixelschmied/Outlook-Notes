@@ -1,0 +1,41 @@
+{
+  "name": "outlook-email-notes",
+  "version": "0.1.0",
+  "description": "An Outlook add-in that docks a private notepad next to each mail. Every mail is linked to its own note by a stable, sequential ID (Mail 1 = Note 1). Paste screenshots and attach files, just like a sticky note for your inbox.",
+  "author": "Pixelschmied",
+  "license": "MIT",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pixelschmied/Outlook-Notes.git"
+  },
+  "keywords": [
+    "outlook",
+    "outlook-add-in",
+    "office-add-in",
+    "office-js",
+    "email-notes",
+    "notes"
+  ],
+  "scripts": {
+    "make-icons": "node scripts/make-icons.mjs",
+    "typecheck": "tsc --noEmit",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
+    "start": "webpack serve --mode development",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "dev-certs": "office-addin-dev-certs install"
+  },
+  "devDependencies": {
+    "@types/office-js": "^1.0.377",
+    "copy-webpack-plugin": "^12.0.2",
+    "html-webpack-plugin": "^5.6.3",
+    "office-addin-dev-certs": "^1.13.5",
+    "office-addin-manifest": "^1.13.5",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.0"
+  }
+}
