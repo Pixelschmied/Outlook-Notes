@@ -29,11 +29,20 @@ jobs:
         env:
           PUBLIC_URL: https://pixelschmied.github.io/Outlook-Notes
 
-      - name: Install Inno Setup
-        run: choco install innosetup --version=6.3.3 -y --no-progress
-
       - name: Compile installer
-        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\EmailNotes.iss'
+        shell: pwsh
+        run: |
+          # Inno Setup is preinstalled on windows-latest; find ISCC.exe robustly.
+          $candidates = @(
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+            "C:\Program Files\Inno Setup 6\ISCC.exe"
+          )
+          $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) { $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source }
+          if (-not $iscc) { throw "ISCC.exe (Inno Setup) not found on the runner." }
+          Write-Host "Using $iscc"
+          & $iscc installer\EmailNotes.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
 
       - uses: actions/upload-artifact@v4
         with:
