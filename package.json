@@ -1,6 +1,6 @@
 {
   "name": "outlook-email-notes",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "An Outlook add-in that docks a private notepad next to each mail. Every mail is linked to its own note by a stable, sequential ID (Mail 1 = Note 1). Paste screenshots and attach files, just like a sticky note for your inbox.",
   "author": "Pixelschmied",
   "license": "MIT",
