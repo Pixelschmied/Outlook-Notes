@@ -6,28 +6,43 @@ you take notes on is **Note 1**, the next distinct mail is **Note 2**, and so on
 Paste screenshots and attach files straight into the note. Nothing ever leaves
 your device.
 
-This is the "email notes" idea from the internal Pixel-App, rebuilt as a proper,
-standalone **Office add-in** so it lives inside Outlook itself.
+This is the "email notes" idea from the internal Pixel-App, rebuilt so it lives
+inside Outlook itself.
 
 > **Independent, open-source project.** Not affiliated with, endorsed by, or
 > sponsored by Microsoft. See [Legal & Microsoft compliance](#legal--microsoft-compliance).
 
+## Two editions
+
+There are two builds of the add-in, because Outlook has two add-in models:
+
+| | **Native (recommended)** | **Web** |
+| --- | --- | --- |
+| Technology | COM add-in (.NET, WinForms) | Office.js web add-in |
+| Microsoft login / M365 | **not required** | required (M365/Exchange add-in platform) |
+| Internet | **not required** — fully offline | loads its UI over HTTPS |
+| Install | `EmailNotesSetup.exe`, per-user, no admin | sideload/deploy the manifest |
+| Best for | any classic Outlook, incl. locked-down/on-prem | Microsoft 365 mailboxes |
+
+If the web add-in never shows up (you see "Sign in" or "You have no apps"), your
+Outlook doesn't have the web add-in platform enabled — **use the native edition**.
+
 ---
 
-## Install (one click, no Node, no dev tools)
+## Install (native — one click, local, no login)
 
-1. **Download `EmailNotesSetup.exe`** from the
+1. **Close Outlook.**
+2. **Download `EmailNotesSetup.exe`** from the
    [latest release](https://github.com/Pixelschmied/Outlook-Notes/releases).
-2. **Run it.** No administrator rights are needed — it installs just for you.
-   (Windows SmartScreen may warn about an unknown publisher because the
-   installer isn't code-signed yet; choose **More info → Run anyway**. See
-   [Code signing](#code-signing).)
-3. **Restart Outlook.** Open any mail, click **Notes** on the ribbon, and click
-   the **pin** icon so the pane stays docked while you browse your inbox.
+3. **Run it.** No administrator rights needed — it installs just for you.
+   (Windows SmartScreen may warn about an unknown publisher because the installer
+   isn't code-signed; choose **More info → Run anyway**. See [Code signing](#code-signing).)
+4. **Start Outlook**, open any mail, and click **Notes** in the **Email Notes**
+   group on the Home ribbon. The notepad docks on the right, next to your mail.
 
-That's it — no Node.js, no commands, no local server. The installer registers
-the add-in with Outlook; the add-in's code is served over HTTPS from this
-project's GitHub Pages site (your notes are **not** — they stay on your PC).
+It runs completely locally — **no Microsoft login, no internet**. Notes and
+screenshots are stored only on your PC under `%APPDATA%\EmailNotes`. A log at
+`%APPDATA%\EmailNotes\addin.log` helps if the button doesn't appear.
 
 To remove it: uninstall **Email Notes** from *Windows Settings → Apps*, then
 restart Outlook.
