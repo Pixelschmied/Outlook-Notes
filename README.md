@@ -47,6 +47,15 @@ screenshots are stored only on your PC under `%APPDATA%\EmailNotes`. A log at
 To remove it: uninstall **Email Notes** from *Windows Settings → Apps*, then
 restart Outlook.
 
+### Automatic updates
+
+At Outlook startup the add-in quietly checks GitHub for a newer release. If one
+exists, a bar appears at the top of the notepad — **"Neue Version … verfügbar –
+jetzt aktualisieren"**. Clicking it downloads the new installer and runs it (it
+closes Outlook, updates, and you reopen). The check is best-effort and
+offline-safe: with no internet, or if GitHub is blocked, nothing happens and the
+notepad keeps working locally.
+
 ## What it does
 
 - 📌 **Docks next to the mail.** A pinnable task pane on the message-read

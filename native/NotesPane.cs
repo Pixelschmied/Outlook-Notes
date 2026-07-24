@@ -20,6 +20,10 @@ namespace EmailNotes
     {
         private readonly Store _store = new Store();
 
+        private Panel _updateBar;
+        private LinkLabel _updateLink;
+        private Updater.Info _update;
+
         private Label _header;
         private TextBox _note;
         private Button _btnShot;
@@ -52,6 +56,27 @@ namespace EmailNotes
             ShowNoSelection();
             _poll.Start();
             Poll();
+            // Offer an update at startup if a newer release exists (best effort, offline-safe).
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                var info = Updater.Check();
+                if (info == null) return;
+                try { if (IsHandleCreated) BeginInvoke((Action)(() => ShowUpdateBar(info))); } catch { }
+            });
+        }
+
+        private void ShowUpdateBar(Updater.Info info)
+        {
+            _update = info;
+            _updateLink.Text = "⬆  Neue Version " + info.Version + " verfügbar – jetzt aktualisieren";
+            _updateBar.Visible = true;
+        }
+
+        private void OnUpdateClick()
+        {
+            if (_update == null) return;
+            _updateLink.Text = "Lädt Update…";
+            System.Threading.ThreadPool.QueueUserWorkItem(_ => Updater.DownloadAndRun(_update));
         }
 
         // ---- UI ----
@@ -119,12 +144,40 @@ namespace EmailNotes
 
             _saved = new Label { Dock = DockStyle.Bottom, Height = 18, ForeColor = Color.FromArgb(167, 163, 179), Text = "" };
 
-            // Add in reverse dock order (Fill first).
+            _updateBar = new Panel { Dock = DockStyle.Top, Height = 30, BackColor = Color.FromArgb(124, 92, 246), Visible = false };
+            _updateLink = new Button
+            {
+                Dock = DockStyle.Fill,
+                FlatStyle = FlatStyle.Flat,
+                TextAlign = ContentAlignment.MiddleLeft,
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(124, 92, 246),
+                Cursor = Cursors.Hand,
+                Text = "Update verfügbar"
+            };
+            _updateLink.FlatAppearance.BorderSize = 0;
+            _updateLink.Click += (s, e) => OnUpdateClick();
+            var dismiss = new Button
+            {
+                Dock = DockStyle.Right,
+                Width = 28,
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(124, 92, 246),
+                Text = "✕"
+            };
+            dismiss.FlatAppearance.BorderSize = 0;
+            dismiss.Click += (s, e) => { _updateBar.Visible = false; };
+            _updateBar.Controls.Add(_updateLink);
+            _updateBar.Controls.Add(dismiss);
+
+            // Add in reverse dock order (Fill first, outermost edges last).
             Controls.Add(_note);
             Controls.Add(attGroup);
             Controls.Add(_saved);
             Controls.Add(actions);
             Controls.Add(_header);
+            Controls.Add(_updateBar);
         }
 
         private Button MakeButton(string text)
