@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+  <ribbon>
+    <tabs>
+      <tab idMso="TabMail">
+        <group id="emailNotesGroup" label="Email Notes">
+          <button id="emailNotesToggle"
+                  label="Notes"
+                  showImage="false"
+                  size="normal"
+                  onAction="OnNotesButton"
+                  screentip="E-Mail-Notizen"
+                  supertip="Notizblock neben der Mail ein-/ausblenden." />
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

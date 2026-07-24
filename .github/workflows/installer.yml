@@ -1,13 +1,12 @@
 name: installer
 
-# Compiles the styled Windows installer (EmailNotesSetup.exe) on a real Windows
-# runner. Every push uploads it as a build artifact.
+# Builds the native COM add-in (EmailNotesAddin.dll) and compiles the styled
+# Windows installer (EmailNotesSetup.exe) on a real Windows runner.
 #
-# A GitHub Release with the installer attached is created either by:
-#   * pushing a version tag (e.g. v0.1.0), or
+# A GitHub Release with the installer attached is created by:
+#   * pushing a version tag (e.g. v0.2.0), or
 #   * running this workflow manually (Actions -> installer -> "Run workflow"),
-#     which lets the workflow's own token create the tag + release. This is what
-#     allows the release to be cut without pushing a tag by hand.
+#     which lets the workflow's own token create the tag + release.
 
 on:
   push:
@@ -20,7 +19,7 @@ on:
         type: boolean
         default: true
       version:
-        description: 'Release tag, e.g. v0.1.1 (blank = version from package.json)'
+        description: 'Release tag, e.g. v0.2.1 (blank = version from package.json)'
         type: string
         default: ''
   release:
@@ -34,18 +33,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
 
-      - run: npm ci
-      - run: npm run build
-      - run: node scripts/make-installer-art.mjs
-      - name: Stamp production manifest
-        run: node scripts/build-manifest.mjs
-        env:
-          PUBLIC_URL: https://pixelschmied.github.io/Outlook-Notes
+      - name: Build native add-in
+        run: dotnet build native/EmailNotesAddin.csproj -c Release -v minimal
 
       - name: Compile installer
         shell: pwsh
@@ -68,8 +58,6 @@ jobs:
           path: installer/Output/EmailNotesSetup.exe
           if-no-files-found: error
 
-      # Work out the release tag: explicit input, else the pushed tag, else the
-      # version from package.json (prefixed with "v").
       - name: Resolve release tag
         id: ver
         shell: pwsh
@@ -86,8 +74,6 @@ jobs:
           "tag=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Release tag: $v"
 
-      # Create/update the Release and attach the installer. On a manual run the
-      # workflow's token creates the tag itself, so no hand-pushed tag is needed.
       - name: Publish release with installer
         if: >-
           github.event_name == 'release' ||
@@ -103,14 +89,16 @@ jobs:
           files: installer/Output/EmailNotesSetup.exe
           body: |
             **Email Notes for Outlook** — a private notepad docked next to each mail.
+            This is the **native** add-in: it runs fully locally, with **no Microsoft
+            login and no internet**, and installs per-user (no admin).
 
             ### Install
-            1. Download **EmailNotesSetup.exe** below.
-            2. Run it (no admin needed). Windows SmartScreen may warn about an
-               unknown publisher — choose **More info → Run anyway** (the installer
-               is not code-signed).
-            3. Restart Outlook, open a mail, click **Notes** on the ribbon, and pin
-               the pane.
+            1. **Close Outlook.**
+            2. Download **EmailNotesSetup.exe** below and run it. Windows SmartScreen
+               may warn about an unknown publisher — choose **More info → Run anyway**
+               (the installer is not code-signed).
+            3. Start Outlook, open a mail, and click **Notes** in the **Email Notes**
+               group on the Home ribbon. The notepad docks on the right.
 
-            Notes and screenshots stay on your device. See the
-            [README](https://github.com/Pixelschmied/Outlook-Notes#readme) for details.
+            Notes and screenshots stay on your device under `%APPDATA%\EmailNotes`.
+            See the [README](https://github.com/Pixelschmied/Outlook-Notes#readme).

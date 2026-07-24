@@ -2,14 +2,18 @@ Almost done!
 
 To start using Email Notes:
 
-  1. Fully close and reopen classic Outlook (so it reloads its add-ins).
+  1. Start Outlook (classic desktop).
   2. Open any mail.
-  3. On the ribbon, click "Notes" to open the pane.
-  4. Click the pin icon in the pane header to keep it docked while you
-     browse your inbox.
+  3. On the Home ribbon, look for the "Email Notes" group and click "Notes".
+     The notepad docks on the right side, next to your mail.
 
-Your notes and screenshots are stored locally on this computer only. They
-are never uploaded anywhere.
+It works completely locally — no Microsoft login, no internet. Your notes and
+screenshots are stored only on this computer under
+%APPDATA%\EmailNotes.
+
+If the "Notes" button does not appear:
+  * Make sure Outlook was fully closed during installation, then reopen it.
+  * A log file at %APPDATA%\EmailNotes\addin.log shows what happened.
 
 To remove the add-in later, uninstall "Email Notes" from Windows
 Settings > Apps, then restart Outlook.

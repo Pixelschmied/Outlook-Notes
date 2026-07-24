@@ -1,6 +1,8 @@
 node_modules/
 dist/
 installer/Output/
+native/bin/
+native/obj/
 *.log
 npm-debug.log*
 .DS_Store
