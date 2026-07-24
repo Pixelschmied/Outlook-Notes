@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Email Notes")]
 [assembly: AssemblyCompany("Pixelschmied")]
 [assembly: AssemblyCopyright("MIT License")]
-[assembly: AssemblyVersion("0.2.4.0")]
-[assembly: AssemblyFileVersion("0.2.4.0")]
+[assembly: AssemblyVersion("0.2.5.0")]
+[assembly: AssemblyFileVersion("0.2.5.0")]
 
 // Individual classes opt in to COM; the assembly itself is not COM-visible.
 [assembly: ComVisible(false)]

@@ -4,13 +4,17 @@ using System.Runtime.InteropServices;
 namespace EmailNotes
 {
     // Add-in COM interfaces, hand-declared so the project builds WITHOUT any
-    // Office PIA. Declared exactly like the real primary interop assemblies:
-    // IDispatch-based, ComVisible, no ComImport (we IMPLEMENT them, the CCW
-    // exposes them). Outlook object-model access stays late-bound via `dynamic`.
+    // Office PIA. They MUST be DUAL: Outlook calls IDTExtensibility2 (and the
+    // others) through the v-table, so the CCW has to expose those v-table slots.
+    // Declaring them IDispatch-only makes the host's v-table call land in empty
+    // space and crash Outlook right after the object is constructed. Dual also
+    // still supports IDispatch, so it covers both calling conventions.
+    //
+    // Outlook object-model access itself stays late-bound via `dynamic`.
 
     [ComVisible(true)]
     [Guid("B65AD801-ABAF-11D0-BB8B-00A0C90F2744")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+    [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface IDTExtensibility2
     {
         [DispId(1)]
@@ -28,7 +32,7 @@ namespace EmailNotes
 
     [ComVisible(true)]
     [Guid("000C0396-0000-0000-C000-000000000046")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+    [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface IRibbonExtensibility
     {
         [return: MarshalAs(UnmanagedType.BStr)]
@@ -37,7 +41,7 @@ namespace EmailNotes
 
     [ComVisible(true)]
     [Guid("000C033A-0000-0000-C000-000000000046")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+    [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface ICustomTaskPaneConsumer
     {
         void CTPFactoryAvailable([MarshalAs(UnmanagedType.IDispatch)] object ctpFactoryInst);
