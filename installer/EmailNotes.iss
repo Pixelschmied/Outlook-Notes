@@ -8,7 +8,7 @@
 ; Output: Output\EmailNotesSetup.exe
 
 #define AppName "Email Notes"
-#define AppVersion "0.2.2"
+#define AppVersion "0.2.3"
 #define Publisher "Pixelschmied"
 #define AppUrl "https://github.com/Pixelschmied/Outlook-Notes"
 
@@ -16,8 +16,8 @@
 #define ConnectClsid "{{E7A9C1F4-3B2D-4A6E-8C1B-9D0E2F3A4B51}"
 #define PaneClsid "{{B1D9E7C2-6F1A-4C2E-9E7D-2A5B3C4D5E61}"
 #define ControlCat "{{40FC6ED4-2438-11CF-A3DB-080036F12502}"
-#define AsmFullName "EmailNotesAddin, Version=0.2.2.0, Culture=neutral, PublicKeyToken=null"
-#define AsmVer "0.2.2.0"
+#define AsmFullName "EmailNotesAddin, Version=0.2.3.0, Culture=neutral, PublicKeyToken=null"
+#define AsmVer "0.2.3.0"
 
 [Setup]
 AppId={{9EE94300-AFF0-4300-B6A7-51EBCEA1FBD7}}
