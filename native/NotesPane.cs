@@ -21,7 +21,7 @@ namespace EmailNotes
         private readonly Store _store = new Store();
 
         private Panel _updateBar;
-        private LinkLabel _updateLink;
+        private Button _updateLink;
         private Updater.Info _update;
 
         private Label _header;
