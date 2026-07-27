@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Native COM add-in for classic Outlook (.NET Framework 4.8, WinForms).
-    Builds anywhere with `dotnet build -c Release` — no Office install needed,
-    because the Outlook object model is used late-bound (dynamic) and the few
-    add-in interfaces are hand-declared in OfficeInterop.cs.
+    Outlook-Notes native COM add-in (.NET Framework 4.8, WinForms).
+    Built on NetOffice (pure NuGet, no Office install needed) so the add-in COM
+    plumbing is provided by a proven library instead of hand-declared interfaces.
   -->
 
   <PropertyGroup>
@@ -19,8 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Provides the net48 reference assemblies so the build needs no local framework. -->
+    <!-- net48 reference assemblies so the build needs no local framework. -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <!-- Proven Office COM add-in framework (brings NetOffice.Core + Outlook API). -->
+    <PackageReference Include="NetOfficeFw.Outlook" Version="1.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,12 +31,6 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Ribbon.xml">
-      <LogicalName>EmailNotes.Ribbon.xml</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
