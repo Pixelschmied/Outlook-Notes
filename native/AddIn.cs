@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using NetOffice.Tools;
+using NetOffice.OutlookApi.Tools;
 
 namespace EmailNotes
 {
@@ -12,10 +13,10 @@ namespace EmailNotes
     /// instead of hand-declared interfaces. This first cut only proves it loads:
     /// it logs and shows a confirmation box at startup.
     /// </summary>
-    [COMAddin("Outlook-Notes", "Privater Notizblock neben der Mail.", 3)]
+    [COMAddin("Outlook-Notes", "Privater Notizblock neben der Mail.", LoadBehavior.LoadAtStartup)]
     [ProgId("OutlookNotes.AddIn")]
     [Guid("E7A9C1F4-3B2D-4A6E-8C1B-9D0E2F3A4B51")]
-    [RegistryLocation(RegistrySaveLocation.CurrentUser)]
+    [Codebase]
     public class AddIn : COMAddin
     {
         public AddIn()

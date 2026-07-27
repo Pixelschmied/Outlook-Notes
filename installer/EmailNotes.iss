@@ -1,23 +1,23 @@
-; Inno Setup script for the Email Notes native COM add-in for classic Outlook.
+; Inno Setup script for the Outlook-Notes native COM add-in (NetOffice-based).
 ;
-; Everything is per-user (HKCU) — no administrator rights, no Microsoft login,
-; no internet. The COM class is registered in BOTH the 64-bit and 32-bit
-; registry views so it loads regardless of whether Outlook is 32-bit or 64-bit.
+; Per-user (HKCU) — no admin, no Microsoft login, no internet. The managed COM
+; class is registered in BOTH the 64-bit and 32-bit views so it loads whatever
+; bitness Outlook is. Activation itself is standard mscoree; NetOffice provides
+; the correct IDTExtensibility2 implementation.
 ;
-; Build:  ISCC.exe EmailNotes.iss   (needs ..\native\bin\Release\EmailNotesAddin.dll)
+; Build:  ISCC.exe EmailNotes.iss   (needs ..\native\bin\Release\*.dll)
 ; Output: Output\EmailNotesSetup.exe
 
-#define AppName "Email Notes"
-#define AppVersion "0.2.6"
+#define AppName "Outlook-Notes"
+#define AppVersion "0.3.0"
 #define Publisher "Pixelschmied"
 #define AppUrl "https://github.com/Pixelschmied/Outlook-Notes"
 
-; COM identifiers (leading brace doubled so Inno emits a literal "{").
-#define ConnectClsid "{{E7A9C1F4-3B2D-4A6E-8C1B-9D0E2F3A4B51}"
-#define PaneClsid "{{B1D9E7C2-6F1A-4C2E-9E7D-2A5B3C4D5E61}"
-#define ControlCat "{{40FC6ED4-2438-11CF-A3DB-080036F12502}"
-#define AsmFullName "EmailNotesAddin, Version=0.2.6.0, Culture=neutral, PublicKeyToken=null"
-#define AsmVer "0.2.6.0"
+#define Clsid "{{E7A9C1F4-3B2D-4A6E-8C1B-9D0E2F3A4B51}"
+#define ClassName "EmailNotes.AddIn"
+#define ProgId "OutlookNotes.AddIn"
+#define AsmFullName "EmailNotesAddin, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null"
+#define AsmVer "0.3.0.0"
 
 [Setup]
 AppId={{9EE94300-AFF0-4300-B6A7-51EBCEA1FBD7}}
@@ -30,7 +30,7 @@ AppSupportURL={#AppUrl}
 VersionInfoDescription={#AppName} Setup
 VersionInfoProductName={#AppName}
 VersionInfoVersion={#AppVersion}
-DefaultDirName={localappdata}\EmailNotes
+DefaultDirName={localappdata}\OutlookNotes
 DisableProgramGroupPage=yes
 DisableDirPage=yes
 PrivilegesRequired=lowest
@@ -53,98 +53,61 @@ InfoAfterFile=after.txt
 Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "..\native\bin\Release\EmailNotesAddin.dll"; DestDir: "{app}"; Flags: ignoreversion
+; Ship the add-in DLL and all its NetOffice dependencies.
+Source: "..\native\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\assets\app.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
 ; =========================================================================
-;  Native (64-bit) registry view — used by 64-bit Outlook.
+;  Native (64-bit) view — used by 64-bit Outlook.
 ; =========================================================================
-; --- COM add-in class (EmailNotes.Connect) ---
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}"; ValueType: string; ValueData: "EmailNotes.Connect"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.Connect"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.Connect"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#ConnectClsid}\ProgId"; ValueType: string; ValueData: "EmailNotes.Connect"
-Root: HKCU; Subkey: "Software\Classes\EmailNotes.Connect"; ValueType: string; ValueData: "EmailNotes.Connect"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\EmailNotes.Connect\CLSID"; ValueType: string; ValueData: "{#ConnectClsid}"
-; --- Task-pane control (EmailNotes.NotesPane) ---
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}"; ValueType: string; ValueData: "EmailNotes.NotesPane"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.NotesPane"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.NotesPane"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\ProgId"; ValueType: string; ValueData: "EmailNotes.NotesPane"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\Implemented Categories\{#ControlCat}"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\Control"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\MiscStatus"; ValueType: string; ValueData: "0"
-Root: HKCU; Subkey: "Software\Classes\EmailNotes.NotesPane"; ValueType: string; ValueData: "EmailNotes.NotesPane"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\EmailNotes.NotesPane\CLSID"; ValueType: string; ValueData: "{#PaneClsid}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}"; ValueType: string; ValueData: "{#ClassName}"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "{#ClassName}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Class"; ValueData: "{#ClassName}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#Clsid}\ProgId"; ValueType: string; ValueData: "{#ProgId}"
+Root: HKCU; Subkey: "Software\Classes\{#ProgId}"; ValueType: string; ValueData: "{#AppName}"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#ProgId}\CLSID"; ValueType: string; ValueData: "{#Clsid}"
 
 ; =========================================================================
 ;  32-bit (Wow6432Node) view — used by 32-bit Outlook on 64-bit Windows.
 ; =========================================================================
-; --- COM add-in class ---
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}"; ValueType: string; ValueData: "EmailNotes.Connect"; Flags: uninsdeletekey; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.Connect"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.Connect"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#ConnectClsid}\ProgId"; ValueType: string; ValueData: "EmailNotes.Connect"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\EmailNotes.Connect"; ValueType: string; ValueData: "EmailNotes.Connect"; Flags: uninsdeletekey; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\EmailNotes.Connect\CLSID"; ValueType: string; ValueData: "{#ConnectClsid}"; Check: IsWin64
-; --- Task-pane control ---
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}"; ValueType: string; ValueData: "EmailNotes.NotesPane"; Flags: uninsdeletekey; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.NotesPane"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Class"; ValueData: "EmailNotes.NotesPane"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\ProgId"; ValueType: string; ValueData: "EmailNotes.NotesPane"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\Implemented Categories\{#ControlCat}"; Flags: uninsdeletekey; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\Control"; Flags: uninsdeletekey; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\MiscStatus"; ValueType: string; ValueData: "0"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\EmailNotes.NotesPane"; ValueType: string; ValueData: "EmailNotes.NotesPane"; Flags: uninsdeletekey; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\EmailNotes.NotesPane\CLSID"; ValueType: string; ValueData: "{#PaneClsid}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}"; ValueType: string; ValueData: "{#ClassName}"; Flags: uninsdeletekey; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "{#ClassName}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Class"; ValueData: "{#ClassName}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\InprocServer32\{#AsmVer}"; ValueType: string; ValueName: "CodeBase"; ValueData: "{code:CodeBase}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#Clsid}\ProgId"; ValueType: string; ValueData: "{#ProgId}"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\{#ProgId}"; ValueType: string; ValueData: "{#AppName}"; Flags: uninsdeletekey; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\{#ProgId}\CLSID"; ValueType: string; ValueData: "{#Clsid}"; Check: IsWin64
 
 ; =========================================================================
 ;  Outlook add-in load entry (not bitness-redirected — one entry serves both).
 ; =========================================================================
-Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\EmailNotes.Connect"; ValueType: dword; ValueName: "LoadBehavior"; ValueData: 3; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\EmailNotes.Connect"; ValueType: dword; ValueName: "CommandLineSafe"; ValueData: 0
-Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\EmailNotes.Connect"; ValueType: string; ValueName: "FriendlyName"; ValueData: "Email Notes"
-Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\EmailNotes.Connect"; ValueType: string; ValueName: "Description"; ValueData: "Privater Notizblock neben der Mail"
+Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#ProgId}"; ValueType: dword; ValueName: "LoadBehavior"; ValueData: 3; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#ProgId}"; ValueType: dword; ValueName: "CommandLineSafe"; ValueData: 0
+Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#ProgId}"; ValueType: string; ValueName: "FriendlyName"; ValueData: "{#AppName}"
+Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#ProgId}"; ValueType: string; ValueName: "Description"; ValueData: "Privater Notizblock neben der Mail"
 
 [Messages]
 WelcomeLabel1=Welcome to the [name] add-in
 WelcomeLabel2=This installs a private notepad next to your mail in classic Outlook.%n%nEverything stays on your device — no account, no cloud, no login. You do not need administrator rights.%n%nPlease close Outlook before continuing.
-FinishedHeadingLabel=Email Notes is installed
-FinishedLabelNoIcons=Start Outlook and open a mail. The notepad docks on the right automatically; you can also toggle it with "Notes" in the "Email Notes" ribbon group.
-FinishedLabel=Start Outlook and open a mail. The notepad docks on the right automatically; you can also toggle it with "Notes" in the "Email Notes" ribbon group.
+FinishedHeadingLabel=Outlook-Notes is installed
+FinishedLabelNoIcons=Start Outlook. If the add-in loads you will briefly see a confirmation. (This build is a load test.)
+FinishedLabel=Start Outlook. If the add-in loads you will briefly see a confirmation. (This build is a load test.)
 
 [Code]
 function CodeBase(Param: String): String;
