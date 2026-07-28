@@ -8,7 +8,7 @@
 ; Output: Output\OutlookNotesSetup.exe
 
 #define AppName "Outlook-Notes"
-#define AppVersion "0.1.0"
+#define AppVersion "0.1.1"
 #define Publisher "Pixelschmied"
 #define AppUrl "https://github.com/Pixelschmied/Outlook-Notes"
 
@@ -19,8 +19,9 @@
 #define PaneClass "OutlookNotes.NotesPane"
 #define PaneProgId "OutlookNotes.NotesPane"
 #define ControlCat "{{40FC6ED4-2438-11CF-A3DB-080036F12502}"
-#define AsmFullName "OutlookNotesAddin, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null"
-#define AsmVer "0.1.0.0"
+#define DotNetCat "{{62C8FE65-4EBB-45E7-B440-6E39B2CDBF29}"
+#define AsmFullName "OutlookNotesAddin, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null"
+#define AsmVer "0.1.1.0"
 #define CB "{code:CodeBase}"
 
 [Setup]
@@ -93,6 +94,8 @@ Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\ProgId"; ValueType: str
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\Implemented Categories\{#ControlCat}"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\Control"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\MiscStatus"; ValueType: string; ValueData: "0"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\MiscStatus\1"; ValueType: string; ValueData: "131457"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\Implemented Categories\{#DotNetCat}"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#PaneProgId}"; ValueType: string; ValueData: "{#PaneClass}"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#PaneProgId}\CLSID"; ValueType: string; ValueData: "{#PaneClsid}"
 
@@ -128,6 +131,8 @@ Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\ProgId"; Va
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\Implemented Categories\{#ControlCat}"; Flags: uninsdeletekey; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\Control"; Flags: uninsdeletekey; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\MiscStatus"; ValueType: string; ValueData: "0"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\MiscStatus\1"; ValueType: string; ValueData: "131457"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\Implemented Categories\{#DotNetCat}"; Flags: uninsdeletekey; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\{#PaneProgId}"; ValueType: string; ValueData: "{#PaneClass}"; Flags: uninsdeletekey; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\{#PaneProgId}\CLSID"; ValueType: string; ValueData: "{#PaneClsid}"; Check: IsWin64
 
