@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Web.Script.Serialization;
 
-namespace EmailNotes
+namespace OutlookNotes
 {
     /// <summary>One attachment of a note (the file lives next to the store).</summary>
     public class Attachment
@@ -25,7 +25,7 @@ namespace EmailNotes
     }
 
     /// <summary>
-    /// Local, offline note storage — everything lives under %APPDATA%\EmailNotes.
+    /// Local, offline note storage — everything lives under %APPDATA%\OutlookNotes.
     /// Notes are keyed by the mail's Outlook EntryID and given a sequential
     /// number the first time a mail is seen (Mail 1 = Note 1, Mail 2 = Note 2 …).
     /// </summary>
@@ -45,7 +45,7 @@ namespace EmailNotes
 
         public Store()
         {
-            _dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EmailNotes");
+            _dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OutlookNotes");
             Directory.CreateDirectory(_dir);
             _file = Path.Combine(_dir, "notes.json");
             Load();

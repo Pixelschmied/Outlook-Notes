@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using NetOffice.Tools;
 using NetOffice.OutlookApi.Tools;
+using Office = NetOffice.OfficeApi;
+using NetOffice.OfficeApi.Enums;
 
-namespace EmailNotes
+namespace OutlookNotes
 {
     /// <summary>
-    /// Outlook-Notes add-in, built on NetOffice so the COM add-in plumbing
-    /// (IDTExtensibility2, ribbon, task pane) is handled by a proven library
-    /// instead of hand-declared interfaces. This first cut only proves it loads:
-    /// it logs and shows a confirmation box at startup.
+    /// Outlook-Notes add-in (NetOffice COMAddin). Adds a ribbon button and a
+    /// docked task pane hosting the WinForms notepad. Fully local — no login,
+    /// no internet, per-user install.
     /// </summary>
     [COMAddin("Outlook-Notes", "Privater Notizblock neben der Mail.", LoadBehavior.LoadAtStartup)]
     [ProgId("OutlookNotes.AddIn")]
@@ -19,17 +19,67 @@ namespace EmailNotes
     [Codebase]
     public class AddIn : COMAddin
     {
+        private Office._CustomTaskPane _ctp;
+        private NotesPane _pane;
+
         public AddIn()
         {
             Log("ctor");
             OnStartupComplete += AddIn_OnStartupComplete;
         }
 
+        // Ribbon XML (returned to Outlook). Inline to avoid embedded-resource lookup.
+        public override string GetCustomUI(string ribbonID)
+        {
+            Log("GetCustomUI " + ribbonID);
+            return
+                "<customUI xmlns=\"http://schemas.microsoft.com/office/2009/07/customui\">" +
+                "<ribbon><tabs><tab idMso=\"TabMail\">" +
+                "<group id=\"outlookNotesGroup\" label=\"Outlook-Notes\">" +
+                "<button id=\"outlookNotesToggle\" label=\"Notizen\" showImage=\"false\" size=\"normal\"" +
+                " onAction=\"OnNotesButton\" screentip=\"Notizblock neben der Mail ein-/ausblenden\" />" +
+                "</group></tab></tabs></ribbon></customUI>";
+        }
+
+        // Ribbon button callback (invoked by name).
+        public void OnNotesButton(object control)
+        {
+            Log("OnNotesButton");
+            try
+            {
+                if (EnsurePane()) _ctp.Visible = !_ctp.Visible;
+            }
+            catch (Exception ex) { Log("OnNotesButton err: " + ex); }
+        }
+
         private void AddIn_OnStartupComplete(ref Array custom)
         {
             Log("OnStartupComplete");
-            try { MessageBox.Show("Outlook-Notes läuft! 🎉"); }
-            catch (Exception ex) { Log("msgbox: " + ex.Message); }
+            try
+            {
+                if (EnsurePane()) _ctp.Visible = true;
+            }
+            catch (Exception ex) { Log("startup pane err: " + ex); }
+        }
+
+        /// <summary>Create the docked task pane on demand (returns true if it exists).</summary>
+        private bool EnsurePane()
+        {
+            if (_ctp != null) return true;
+            if (TaskPaneFactory == null) { Log("no TaskPaneFactory yet"); return false; }
+            _ctp = TaskPaneFactory.CreateCTP("OutlookNotes.NotesPane", "E-Mail-Notizen", Type.Missing);
+            _ctp.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight;
+            _ctp.Width = 360;
+            object content = _ctp.ContentControl;
+            Log("pane content=" + (content == null ? "null" : content.GetType().FullName));
+            _pane = content as NotesPane;
+            if (_pane != null)
+            {
+                object rawApp = null;
+                try { rawApp = Application.UnderlyingObject; } catch { rawApp = Application; }
+                _pane.Initialize(rawApp);
+            }
+            return true;
         }
 
         internal static void Log(string message)
@@ -37,7 +87,7 @@ namespace EmailNotes
             try
             {
                 string dir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EmailNotes");
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OutlookNotes");
                 Directory.CreateDirectory(dir);
                 File.AppendAllText(Path.Combine(dir, "addin.log"),
                     DateTime.Now.ToString("s") + "  " + message + Environment.NewLine);

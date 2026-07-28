@@ -1,7 +1,7 @@
 name: installer
 
-# Builds the native COM add-in (EmailNotesAddin.dll) and compiles the styled
-# Windows installer (EmailNotesSetup.exe) on a real Windows runner.
+# Builds the native COM add-in (OutlookNotesAddin.dll) and compiles the styled
+# Windows installer (OutlookNotesSetup.exe) on a real Windows runner.
 #
 # A GitHub Release with the installer attached is created by:
 #   * pushing a version tag (e.g. v0.2.0), or
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build native add-in
-        run: dotnet build native/EmailNotesAddin.csproj -c Release -v minimal
+        run: dotnet build native/OutlookNotesAddin.csproj -c Release -v minimal
 
       - name: Compile installer
         shell: pwsh
@@ -49,13 +49,13 @@ jobs:
           if (-not $iscc) { $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source }
           if (-not $iscc) { throw "ISCC.exe (Inno Setup) not found on the runner." }
           Write-Host "Using $iscc"
-          & $iscc installer\EmailNotes.iss
+          & $iscc installer\OutlookNotes.iss
           if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: EmailNotesSetup
-          path: installer/Output/EmailNotesSetup.exe
+          name: OutlookNotesSetup
+          path: installer/Output/OutlookNotesSetup.exe
           if-no-files-found: error
 
       - name: Resolve release tag
@@ -82,23 +82,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
-          name: Email Notes ${{ steps.ver.outputs.tag }}
+          name: Outlook-Notes ${{ steps.ver.outputs.tag }}
           target_commitish: ${{ github.sha }}
           prerelease: false
           make_latest: true
-          files: installer/Output/EmailNotesSetup.exe
+          files: installer/Output/OutlookNotesSetup.exe
           body: |
-            **Email Notes for Outlook** — a private notepad docked next to each mail.
+            **Outlook-Notes** — a private notepad docked next to each mail.
             This is the **native** add-in: it runs fully locally, with **no Microsoft
             login and no internet**, and installs per-user (no admin).
 
             ### Install
             1. **Close Outlook.**
-            2. Download **EmailNotesSetup.exe** below and run it. Windows SmartScreen
+            2. Download **OutlookNotesSetup.exe** below and run it. Windows SmartScreen
                may warn about an unknown publisher — choose **More info → Run anyway**
                (the installer is not code-signed).
-            3. Start Outlook, open a mail, and click **Notes** in the **Email Notes**
+            3. Start Outlook, open a mail, and click **Notizen** in the **Outlook-Notes**
                group on the Home ribbon. The notepad docks on the right.
 
-            Notes and screenshots stay on your device under `%APPDATA%\EmailNotes`.
+            Notes and screenshots stay on your device under `%APPDATA%\OutlookNotes`.
             See the [README](https://github.com/Pixelschmied/Outlook-Notes#readme).

@@ -9,7 +9,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>EmailNotes</RootNamespace>
-    <AssemblyName>EmailNotesAddin</AssemblyName>
+    <AssemblyName>OutlookNotesAddin</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>

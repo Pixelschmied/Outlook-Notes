@@ -6,7 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Web.Script.Serialization;
 
-namespace EmailNotes
+namespace OutlookNotes
 {
     /// <summary>
     /// Best-effort update check against the project's latest GitHub release.
@@ -32,7 +32,7 @@ namespace EmailNotes
             {
                 try { ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12; } catch { }
                 var req = (HttpWebRequest)WebRequest.Create(ApiUrl);
-                req.UserAgent = "EmailNotes-Updater";
+                req.UserAgent = "OutlookNotes-Updater";
                 req.Accept = "application/vnd.github+json";
                 req.Timeout = 8000;
 
@@ -73,11 +73,11 @@ namespace EmailNotes
             {
                 if (!string.IsNullOrEmpty(info.DownloadUrl))
                 {
-                    string tmp = Path.Combine(Path.GetTempPath(), "EmailNotesSetup.exe");
+                    string tmp = Path.Combine(Path.GetTempPath(), "OutlookNotesSetup.exe");
                     try { ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12; } catch { }
                     using (var wc = new WebClient())
                     {
-                        wc.Headers.Add("User-Agent", "EmailNotes-Updater");
+                        wc.Headers.Add("User-Agent", "OutlookNotes-Updater");
                         wc.DownloadFile(info.DownloadUrl, tmp);
                     }
                     System.Diagnostics.Process.Start(tmp);

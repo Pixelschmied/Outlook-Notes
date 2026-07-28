@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace EmailNotes
+namespace OutlookNotes
 {
     /// <summary>
     /// The docked notepad shown next to the mail. A plain WinForms control so it
@@ -14,7 +14,7 @@ namespace EmailNotes
     /// </summary>
     [ComVisible(true)]
     [Guid("B1D9E7C2-6F1A-4C2E-9E7D-2A5B3C4D5E61")]
-    [ProgId("EmailNotes.NotesPane")]
+    [ProgId("OutlookNotes.NotesPane")]
     [ClassInterface(ClassInterfaceType.None)]
     public class NotesPane : UserControl
     {
