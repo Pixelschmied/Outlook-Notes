@@ -1,0 +1,28 @@
+name: cleanup-releases
+
+# One-off maintenance: delete ALL GitHub Releases and their tags, so the
+# version history can start clean. Manual-only.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all releases and tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          tags=$(gh release list --repo "$REPO" --limit 200 --json tagName -q '.[].tagName')
+          if [ -z "$tags" ]; then echo "No releases to delete."; exit 0; fi
+          for tag in $tags; do
+            echo "Deleting release + tag: $tag"
+            gh release delete "$tag" --repo "$REPO" --yes --cleanup-tag || echo "  (failed for $tag, continuing)"
+          done
+          echo "Done."
