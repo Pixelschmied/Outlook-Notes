@@ -215,12 +215,14 @@ namespace OutlookNotes
 
             _saved = new Label { Dock = DockStyle.Bottom, Height = 18, ForeColor = Color.FromArgb(167, 163, 179), Text = "" };
 
-            _updateBar = new Panel { Dock = DockStyle.Top, Height = 30, BackColor = Color.FromArgb(124, 92, 246), Visible = false };
+            _updateBar = new Panel { Dock = DockStyle.Top, Height = 40, BackColor = Color.FromArgb(124, 92, 246), Visible = false };
             _updateLink = new Button
             {
                 Dock = DockStyle.Fill,
                 FlatStyle = FlatStyle.Flat,
                 TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(8, 0, 0, 0),
+                AutoEllipsis = true,
                 ForeColor = Color.White,
                 BackColor = Color.FromArgb(124, 92, 246),
                 Cursor = Cursors.Hand,
