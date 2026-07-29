@@ -8,6 +8,21 @@ using System.Windows.Forms;
 namespace OutlookNotes
 {
     /// <summary>
+    /// Explicit default COM interface for the task-pane control. Office's task
+    /// pane host embeds the control as an ActiveX control and QIs for its default
+    /// interface; a WinForms UserControl registered with ClassInterfaceType.None
+    /// and no explicit default interface exposes none, which is what makes
+    /// CreateCTP fail with "Unable to create specified ActiveX control". Giving
+    /// the coclass a concrete default interface fixes that.
+    /// </summary>
+    [ComVisible(true)]
+    [Guid("C3E8B5A1-7D2F-4E9C-8B6A-1F2E3D4C5B60")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+    public interface INotesPane
+    {
+    }
+
+    /// <summary>
     /// The docked notepad shown next to the mail. A plain WinForms control so it
     /// loads locally with no login, no web view and no internet. It polls the
     /// Outlook selection (late-bound) and keeps a note per mail.
@@ -16,7 +31,8 @@ namespace OutlookNotes
     [Guid("B1D9E7C2-6F1A-4C2E-9E7D-2A5B3C4D5E61")]
     [ProgId("OutlookNotes.NotesPane")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class NotesPane : UserControl
+    [ComDefaultInterface(typeof(INotesPane))]
+    public class NotesPane : UserControl, INotesPane
     {
         private readonly Store _store;
 
