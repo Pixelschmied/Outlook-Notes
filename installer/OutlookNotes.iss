@@ -8,7 +8,7 @@
 ; Output: Output\OutlookNotesSetup.exe
 
 #define AppName "Outlook-Notes"
-#define AppVersion "0.1.0"
+#define AppVersion "0.2.0"
 #define Publisher "Pixelschmied"
 #define AppUrl "https://github.com/Pixelschmied/Outlook-Notes"
 
@@ -20,8 +20,8 @@
 #define PaneProgId "OutlookNotes.NotesPane"
 #define ControlCat "{{40FC6ED4-2438-11CF-A3DB-080036F12502}"
 #define DotNetCat "{{62C8FE65-4EBB-45E7-B440-6E39B2CDBF29}"
-#define AsmFullName "OutlookNotesAddin, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null"
-#define AsmVer "0.1.0.0"
+#define AsmFullName "OutlookNotesAddin, Version=0.2.0.0, Culture=neutral, PublicKeyToken=null"
+#define AsmVer "0.2.0.0"
 #define CB "{code:CodeBase}"
 
 [Setup]
@@ -140,14 +140,14 @@ Root: HKCU; Subkey: "Software\Classes\Wow6432Node\{#PaneProgId}\CLSID"; ValueTyp
 Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#AddinProgId}"; ValueType: dword; ValueName: "LoadBehavior"; ValueData: 3; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#AddinProgId}"; ValueType: dword; ValueName: "CommandLineSafe"; ValueData: 0
 Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#AddinProgId}"; ValueType: string; ValueName: "FriendlyName"; ValueData: "{#AppName}"
-Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#AddinProgId}"; ValueType: string; ValueName: "Description"; ValueData: "Privater Notizblock neben der Mail"
+Root: HKCU; Subkey: "Software\Microsoft\Office\Outlook\Addins\{#AddinProgId}"; ValueType: string; ValueName: "Description"; ValueData: "A private notepad docked next to your mail"
 
 [Messages]
 WelcomeLabel1=Welcome to the [name] add-in
 WelcomeLabel2=This installs a private notepad next to your mail in classic Outlook.%n%nEverything stays on your device — no account, no cloud, no login. You do not need administrator rights.%n%nPlease close Outlook before continuing.
 FinishedHeadingLabel=Outlook-Notes is installed
-FinishedLabelNoIcons=Start Outlook, open a mail, and click "Notizen" in the "Outlook-Notes" ribbon group. The notepad docks on the right.
-FinishedLabel=Start Outlook, open a mail, and click "Notizen" in the "Outlook-Notes" ribbon group. The notepad docks on the right.
+FinishedLabelNoIcons=Start Outlook and click a mail. The notepad docks automatically on the right, in Outlook's own language.
+FinishedLabel=Start Outlook and click a mail. The notepad docks automatically on the right, in Outlook's own language.
 
 [Code]
 function CodeBase(Param: String): String;

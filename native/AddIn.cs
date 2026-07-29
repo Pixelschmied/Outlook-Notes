@@ -13,7 +13,7 @@ namespace OutlookNotes
     /// docked task pane hosting the WinForms notepad. Fully local — no login,
     /// no internet, per-user install.
     /// </summary>
-    [COMAddin("Outlook-Notes", "Privater Notizblock neben der Mail.", LoadBehavior.LoadAtStartup)]
+    [COMAddin("Outlook-Notes", "A private notepad docked next to your mail.", LoadBehavior.LoadAtStartup)]
     [ProgId("OutlookNotes.AddIn")]
     [Guid("E7A9C1F4-3B2D-4A6E-8C1B-9D0E2F3A4B51")]
     [Codebase]
@@ -32,13 +32,24 @@ namespace OutlookNotes
         public override string GetCustomUI(string ribbonID)
         {
             Log("GetCustomUI " + ribbonID);
+            string label;
+            try { label = Localization.Get(Localization.DetectLanguage(GetRawApp())).PaneTitle; }
+            catch { label = "Notes"; }
+            label = System.Security.SecurityElement.Escape(label);
             return
                 "<customUI xmlns=\"http://schemas.microsoft.com/office/2009/07/customui\">" +
                 "<ribbon><tabs><tab idMso=\"TabMail\">" +
                 "<group id=\"outlookNotesGroup\" label=\"Outlook-Notes\">" +
-                "<button id=\"outlookNotesToggle\" label=\"Notizen\" showImage=\"false\" size=\"normal\"" +
-                " onAction=\"OnNotesButton\" screentip=\"Notizblock neben der Mail ein-/ausblenden\" />" +
+                "<button id=\"outlookNotesToggle\" label=\"" + label + "\" showImage=\"false\" size=\"normal\"" +
+                " onAction=\"OnNotesButton\" screentip=\"" + label + "\" />" +
                 "</group></tab></tabs></ribbon></customUI>";
+        }
+
+        /// <summary>The raw Outlook Application COM object (for late-bound calls), or null.</summary>
+        private object GetRawApp()
+        {
+            try { return Application.UnderlyingObject; }
+            catch { try { return Application; } catch { return null; } }
         }
 
         // Ribbon button callback (invoked by name).
@@ -67,18 +78,15 @@ namespace OutlookNotes
         {
             if (_ctp != null) return true;
             if (TaskPaneFactory == null) { Log("no TaskPaneFactory yet"); return false; }
-            _ctp = TaskPaneFactory.CreateCTP("OutlookNotes.NotesPane", "E-Mail-Notizen", Type.Missing);
+            object rawApp = GetRawApp();
+            var loc = Localization.Get(Localization.DetectLanguage(rawApp));
+            _ctp = TaskPaneFactory.CreateCTP("OutlookNotes.NotesPane", loc.PaneTitle, Type.Missing);
             _ctp.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight;
             _ctp.Width = 360;
             object content = _ctp.ContentControl;
             Log("pane content=" + (content == null ? "null" : content.GetType().FullName));
             _pane = content as NotesPane;
-            if (_pane != null)
-            {
-                object rawApp = null;
-                try { rawApp = Application.UnderlyingObject; } catch { rawApp = Application; }
-                _pane.Initialize(rawApp);
-            }
+            if (_pane != null) _pane.Initialize(rawApp);
             return true;
         }
 

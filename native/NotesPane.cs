@@ -36,6 +36,9 @@ namespace OutlookNotes
     {
         private readonly Store _store;
 
+        private string _lang;
+        private Loc _t;
+
         private Panel _updateBar;
         private Button _updateLink;
         private Updater.Info _update;
@@ -44,6 +47,7 @@ namespace OutlookNotes
         private TextBox _note;
         private Button _btnShot;
         private Button _btnFile;
+        private Label _attLabel;
         private ListBox _attList;
         private Button _btnOpen;
         private Button _btnRemove;
@@ -64,6 +68,8 @@ namespace OutlookNotes
             AddIn.Log("NotesPane.ctor: start");
             try
             {
+                _lang = Localization.DetectFromCulture();
+                _t = Localization.Get(_lang);
                 _store = new Store();
                 AddIn.Log("NotesPane.ctor: store ok");
                 _poll = new Timer();
@@ -87,6 +93,14 @@ namespace OutlookNotes
         public void Initialize(object outlookApplication)
         {
             _app = outlookApplication;
+            // Prefer Outlook's own UI language now that the Application is known.
+            string lang = Localization.DetectLanguage(_app);
+            if (!string.IsNullOrEmpty(lang) && lang != _lang)
+            {
+                _lang = lang;
+                _t = Localization.Get(_lang);
+            }
+            ApplyLanguage();
             ShowNoSelection();
             _poll.Start();
             Poll();
@@ -102,15 +116,38 @@ namespace OutlookNotes
         private void ShowUpdateBar(Updater.Info info)
         {
             _update = info;
-            _updateLink.Text = "⬆  Neue Version " + info.Version + " verfügbar – jetzt aktualisieren";
+            _updateLink.Text = string.Format(_t.UpdateAvailable, info.Version);
             _updateBar.Visible = true;
         }
 
         private void OnUpdateClick()
         {
             if (_update == null) return;
-            _updateLink.Text = "Lädt Update…";
+            _updateLink.Text = _t.Loading;
             System.Threading.ThreadPool.QueueUserWorkItem(_ => Updater.DownloadAndRun(_update));
+        }
+
+        /// <summary>Re-label every static control from the current language.</summary>
+        private void ApplyLanguage()
+        {
+            _btnShot.Text = _t.InsertScreenshot;
+            _btnFile.Text = _t.AttachFile;
+            _attLabel.Text = _t.Attachments;
+            _btnOpen.Text = _t.Open;
+            _btnRemove.Text = _t.Remove;
+            _updateLink.Text = _update != null
+                ? string.Format(_t.UpdateAvailable, _update.Version)
+                : _t.UpdateBadge;
+            if (_current == null)
+            {
+                _header.Text = _t.NoMailSelected;
+                _saved.Text = "";
+            }
+            else
+            {
+                _header.Text = HeaderText(_current, null, null);
+                _saved.Text = _t.AutoSaved;
+            }
         }
 
         // ---- UI ----
@@ -119,7 +156,7 @@ namespace OutlookNotes
         {
             BackColor = Color.FromArgb(31, 29, 36);
             ForeColor = Color.FromArgb(236, 236, 240);
-            Font = new Font("Segoe UI", 9f);
+            Font = Localization.UiFont(_lang, 9f);
             Padding = new Padding(10);
 
             _header = new Label
@@ -127,15 +164,15 @@ namespace OutlookNotes
                 Dock = DockStyle.Top,
                 AutoSize = false,
                 Height = 46,
-                Text = "E-Mail-Notizen",
-                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                Text = _t.PaneTitle,
+                Font = Localization.UiFont(_lang, 10f, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft
             };
 
             var actions = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 36, WrapContents = false, AutoSize = false };
-            _btnShot = MakeButton("📋 Screenshot einfügen");
+            _btnShot = MakeButton(_t.InsertScreenshot);
             _btnShot.Click += (s, e) => PasteScreenshot();
-            _btnFile = MakeButton("📎 Datei anhängen");
+            _btnFile = MakeButton(_t.AttachFile);
             _btnFile.Click += (s, e) => AttachFiles();
             actions.Controls.Add(_btnShot);
             actions.Controls.Add(_btnFile);
@@ -156,7 +193,7 @@ namespace OutlookNotes
             _note.KeyDown += Note_KeyDown;
 
             var attGroup = new Panel { Dock = DockStyle.Bottom, Height = 150 };
-            var attLabel = new Label { Dock = DockStyle.Top, Height = 20, Text = "Anhänge", ForeColor = Color.FromArgb(167, 163, 179) };
+            _attLabel = new Label { Dock = DockStyle.Top, Height = 20, Text = _t.Attachments, ForeColor = Color.FromArgb(167, 163, 179) };
             _attList = new ListBox
             {
                 Dock = DockStyle.Fill,
@@ -166,15 +203,15 @@ namespace OutlookNotes
             };
             _attList.DoubleClick += (s, e) => OpenAttachment();
             var attButtons = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 34, WrapContents = false };
-            _btnOpen = MakeButton("Öffnen");
+            _btnOpen = MakeButton(_t.Open);
             _btnOpen.Click += (s, e) => OpenAttachment();
-            _btnRemove = MakeButton("Entfernen");
+            _btnRemove = MakeButton(_t.Remove);
             _btnRemove.Click += (s, e) => RemoveAttachment();
             attButtons.Controls.Add(_btnOpen);
             attButtons.Controls.Add(_btnRemove);
             attGroup.Controls.Add(_attList);
             attGroup.Controls.Add(attButtons);
-            attGroup.Controls.Add(attLabel);
+            attGroup.Controls.Add(_attLabel);
 
             _saved = new Label { Dock = DockStyle.Bottom, Height = 18, ForeColor = Color.FromArgb(167, 163, 179), Text = "" };
 
@@ -187,7 +224,7 @@ namespace OutlookNotes
                 ForeColor = Color.White,
                 BackColor = Color.FromArgb(124, 92, 246),
                 Cursor = Cursors.Hand,
-                Text = "Update verfügbar"
+                Text = _t.UpdateBadge
             };
             _updateLink.FlatAppearance.BorderSize = 0;
             _updateLink.Click += (s, e) => OnUpdateClick();
@@ -198,7 +235,7 @@ namespace OutlookNotes
                 FlatStyle = FlatStyle.Flat,
                 ForeColor = Color.White,
                 BackColor = Color.FromArgb(124, 92, 246),
-                Text = "✕"
+                Text = "×"
             };
             dismiss.FlatAppearance.BorderSize = 0;
             dismiss.Click += (s, e) => { _updateBar.Visible = false; };
@@ -279,7 +316,7 @@ namespace OutlookNotes
             _header.Text = HeaderText(_current, subject, sender);
             _note.Enabled = true;
             _note.Text = _current.Text ?? "";
-            _saved.Text = "wird automatisch gespeichert";
+            _saved.Text = _t.AutoSaved;
             RefreshAttachments();
         }
 
@@ -287,8 +324,9 @@ namespace OutlookNotes
         {
             string subj = string.IsNullOrEmpty(subject) ? (n.Subject ?? "") : subject;
             string snd = string.IsNullOrEmpty(sender) ? (n.Sender ?? "") : sender;
-            string line = "Notiz #" + n.NoteId + "  " + (string.IsNullOrEmpty(subj) ? "(ohne Betreff)" : subj);
-            if (!string.IsNullOrEmpty(snd)) line += "\nvon " + snd;
+            string subjShown = string.IsNullOrEmpty(subj) ? _t.NoSubject : subj;
+            string line = string.Format(_t.NoteHeader, n.NoteId, subjShown);
+            if (!string.IsNullOrEmpty(snd)) line += "\n" + string.Format(_t.From, snd);
             return line;
         }
 
@@ -298,7 +336,7 @@ namespace OutlookNotes
             FlushSave();
             _mailKey = null;
             _current = null;
-            _header.Text = "Keine Mail markiert";
+            _header.Text = _t.NoMailSelected;
             _note.Enabled = false;
             _note.Text = "";
             _saved.Text = "";
@@ -307,13 +345,13 @@ namespace OutlookNotes
 
         // ---- saving ----
 
-        private void SetSaving() { _saved.Text = "Speichere…"; }
+        private void SetSaving() { _saved.Text = _t.Saving; }
 
         private void FlushSave()
         {
             if (_current == null || _mailKey == null) return;
             _store.SaveText(_mailKey, _note.Text);
-            _saved.Text = "gespeichert " + DateTime.Now.ToString("HH:mm:ss");
+            _saved.Text = string.Format(_t.SavedAt, DateTime.Now.ToString("HH:mm:ss"));
         }
 
         // ---- attachments ----
@@ -323,7 +361,7 @@ namespace OutlookNotes
             _attList.Items.Clear();
             if (_current == null) return;
             foreach (var a in _current.Attachments)
-                _attList.Items.Add((a.IsImage ? "🖼 " : "📎 ") + a.Name);
+                _attList.Items.Add(a.Name);
         }
 
         private string SelectedAttachmentName()
@@ -345,7 +383,7 @@ namespace OutlookNotes
         private void PasteScreenshot()
         {
             if (_current == null) return;
-            if (!Clipboard.ContainsImage()) { _saved.Text = "Kein Bild in der Zwischenablage."; return; }
+            if (!Clipboard.ContainsImage()) { _saved.Text = _t.NoImageInClipboard; return; }
             try
             {
                 using (Image img = Clipboard.GetImage())
@@ -358,13 +396,13 @@ namespace OutlookNotes
                     RefreshAttachments();
                 }
             }
-            catch (Exception ex) { _saved.Text = "Fehler: " + ex.Message; }
+            catch (Exception ex) { _saved.Text = string.Format(_t.ErrorPrefix, ex.Message); }
         }
 
         private void AttachFiles()
         {
             if (_current == null) return;
-            using (var dlg = new OpenFileDialog { Multiselect = true, Title = "Anhänge hinzufügen" })
+            using (var dlg = new OpenFileDialog { Multiselect = true, Title = _t.AddAttachmentsDialog })
             {
                 if (dlg.ShowDialog() != DialogResult.OK) return;
                 foreach (var src in dlg.FileNames)
@@ -398,14 +436,14 @@ namespace OutlookNotes
             if (name == null) return;
             try { File.Delete(Path.Combine(_store.AttachmentsDir(_current.NoteId), name)); } catch { }
             _current = _store.RemoveAttachment(_mailKey, name);
-            string token = "[📎 " + name + "]";
+            string token = "[" + name + "]";
             if (_note.Text.Contains(token)) _note.Text = _note.Text.Replace(token, "");
             RefreshAttachments();
         }
 
         private void InsertToken(string name)
         {
-            string token = "[📎 " + name + "]";
+            string token = "[" + name + "]";
             int at = _note.SelectionStart;
             string before = _note.Text.Substring(0, at);
             string pad = (before.Length > 0 && !char.IsWhiteSpace(before[before.Length - 1])) ? " " : "";

@@ -3,15 +3,16 @@ Almost done!
 To start using Outlook-Notes:
 
   1. Start Outlook (classic desktop).
-  2. Open any mail.
-  3. On the Home ribbon, look for the "Outlook-Notes" group and click "Notizen".
-     The notepad docks on the right side, next to your mail.
+  2. Click any mail.
+
+The notepad docks automatically on the right, next to your mail. Its language
+follows Outlook's own language automatically. You can also toggle it from the
+"Outlook-Notes" group on the Home ribbon.
 
 It works completely locally — no Microsoft login, no internet. Your notes and
-screenshots are stored only on this computer under
-%APPDATA%\OutlookNotes.
+screenshots are stored only on this computer under %APPDATA%\OutlookNotes.
 
-If the "Notes" button does not appear:
+If the notepad does not appear:
   * Make sure Outlook was fully closed during installation, then reopen it.
   * A log file at %APPDATA%\OutlookNotes\addin.log shows what happened.
 
