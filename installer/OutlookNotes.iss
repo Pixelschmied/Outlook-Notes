@@ -8,7 +8,7 @@
 ; Output: Output\OutlookNotesSetup.exe
 
 #define AppName "Outlook-Notes"
-#define AppVersion "0.2.1"
+#define AppVersion "0.2.2"
 #define Publisher "Pixelschmied"
 #define AppUrl "https://github.com/Pixelschmied/Outlook-Notes"
 
@@ -20,8 +20,8 @@
 #define PaneProgId "OutlookNotes.NotesPane"
 #define ControlCat "{{40FC6ED4-2438-11CF-A3DB-080036F12502}"
 #define DotNetCat "{{62C8FE65-4EBB-45E7-B440-6E39B2CDBF29}"
-#define AsmFullName "OutlookNotesAddin, Version=0.2.1.0, Culture=neutral, PublicKeyToken=null"
-#define AsmVer "0.2.1.0"
+#define AsmFullName "OutlookNotesAddin, Version=0.2.2.0, Culture=neutral, PublicKeyToken=null"
+#define AsmVer "0.2.2.0"
 #define CB "{code:CodeBase}"
 
 [Setup]

@@ -51,6 +51,9 @@ namespace OutlookNotes
             Load();
         }
 
+        /// <summary>The root folder where all notes and attachments live.</summary>
+        public string RootDir { get { return _dir; } }
+
         public string AttachmentsDir(int noteId)
         {
             string p = Path.Combine(_dir, "attachments", noteId.ToString());

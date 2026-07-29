@@ -27,6 +27,7 @@ namespace OutlookNotes
         public string Loading;
         public string UpdateBadge;
         public string AddAttachmentsDialog;
+        public string OpenFolder;
     }
 
     /// <summary>
@@ -104,6 +105,7 @@ namespace OutlookNotes
                 Loading = "Downloading update…",
                 UpdateBadge = "Update available",
                 AddAttachmentsDialog = "Add attachments",
+                OpenFolder = "Open folder",
             },
             ["de"] = new Loc
             {
@@ -126,6 +128,7 @@ namespace OutlookNotes
                 Loading = "Update wird geladen…",
                 UpdateBadge = "Update verfügbar",
                 AddAttachmentsDialog = "Anhänge hinzufügen",
+                OpenFolder = "Ordner öffnen",
             },
             ["fr"] = new Loc
             {
@@ -148,6 +151,7 @@ namespace OutlookNotes
                 Loading = "Téléchargement de la mise à jour…",
                 UpdateBadge = "Mise à jour disponible",
                 AddAttachmentsDialog = "Ajouter des pièces jointes",
+                OpenFolder = "Ouvrir le dossier",
             },
             ["es"] = new Loc
             {
@@ -170,6 +174,7 @@ namespace OutlookNotes
                 Loading = "Descargando actualización…",
                 UpdateBadge = "Actualización disponible",
                 AddAttachmentsDialog = "Agregar adjuntos",
+                OpenFolder = "Abrir carpeta",
             },
             ["it"] = new Loc
             {
@@ -192,6 +197,7 @@ namespace OutlookNotes
                 Loading = "Download dell'aggiornamento…",
                 UpdateBadge = "Aggiornamento disponibile",
                 AddAttachmentsDialog = "Aggiungi allegati",
+                OpenFolder = "Apri cartella",
             },
             ["pt"] = new Loc
             {
@@ -214,6 +220,7 @@ namespace OutlookNotes
                 Loading = "Baixando atualização…",
                 UpdateBadge = "Atualização disponível",
                 AddAttachmentsDialog = "Adicionar anexos",
+                OpenFolder = "Abrir pasta",
             },
             ["nl"] = new Loc
             {
@@ -236,6 +243,7 @@ namespace OutlookNotes
                 Loading = "Update downloaden…",
                 UpdateBadge = "Update beschikbaar",
                 AddAttachmentsDialog = "Bijlagen toevoegen",
+                OpenFolder = "Map openen",
             },
             ["pl"] = new Loc
             {
@@ -258,6 +266,7 @@ namespace OutlookNotes
                 Loading = "Pobieranie aktualizacji…",
                 UpdateBadge = "Dostępna aktualizacja",
                 AddAttachmentsDialog = "Dodaj załączniki",
+                OpenFolder = "Otwórz folder",
             },
             ["ru"] = new Loc
             {
@@ -280,6 +289,7 @@ namespace OutlookNotes
                 Loading = "Загрузка обновления…",
                 UpdateBadge = "Доступно обновление",
                 AddAttachmentsDialog = "Добавить вложения",
+                OpenFolder = "Открыть папку",
             },
             ["tr"] = new Loc
             {
@@ -302,6 +312,7 @@ namespace OutlookNotes
                 Loading = "Güncelleme indiriliyor…",
                 UpdateBadge = "Güncelleme mevcut",
                 AddAttachmentsDialog = "Ek ekle",
+                OpenFolder = "Klasörü aç",
             },
             ["ja"] = new Loc
             {
@@ -324,6 +335,7 @@ namespace OutlookNotes
                 Loading = "更新をダウンロード中…",
                 UpdateBadge = "更新があります",
                 AddAttachmentsDialog = "添付ファイルを追加",
+                OpenFolder = "フォルダーを開く",
             },
             ["ko"] = new Loc
             {
@@ -346,6 +358,7 @@ namespace OutlookNotes
                 Loading = "업데이트 다운로드 중…",
                 UpdateBadge = "업데이트 사용 가능",
                 AddAttachmentsDialog = "첨부 파일 추가",
+                OpenFolder = "폴더 열기",
             },
             ["zh"] = new Loc
             {
@@ -368,6 +381,7 @@ namespace OutlookNotes
                 Loading = "正在下载更新…",
                 UpdateBadge = "有可用更新",
                 AddAttachmentsDialog = "添加附件",
+                OpenFolder = "打开文件夹",
             },
         };
     }

@@ -52,6 +52,7 @@ namespace OutlookNotes
         private Button _btnOpen;
         private Button _btnRemove;
         private Label _saved;
+        private Button _openFolder;
 
         private readonly Timer _poll;
         private readonly Timer _saveTimer;
@@ -135,6 +136,7 @@ namespace OutlookNotes
             _attLabel.Text = _t.Attachments;
             _btnOpen.Text = _t.Open;
             _btnRemove.Text = _t.Remove;
+            _openFolder.Text = _t.OpenFolder;
             _updateLink.Text = _update != null
                 ? string.Format(_t.UpdateAvailable, _update.Version)
                 : _t.UpdateBadge;
@@ -213,7 +215,29 @@ namespace OutlookNotes
             attGroup.Controls.Add(attButtons);
             attGroup.Controls.Add(_attLabel);
 
-            _saved = new Label { Dock = DockStyle.Bottom, Height = 18, ForeColor = Color.FromArgb(167, 163, 179), Text = "" };
+            // Bottom status bar: auto-save text on the left, "open folder" on the right.
+            var statusBar = new Panel { Dock = DockStyle.Bottom, Height = 26 };
+            _saved = new Label
+            {
+                Dock = DockStyle.Fill,
+                ForeColor = Color.FromArgb(167, 163, 179),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Text = ""
+            };
+            _openFolder = new Button
+            {
+                Dock = DockStyle.Right,
+                AutoSize = true,
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.FromArgb(198, 190, 220),
+                BackColor = Color.FromArgb(50, 46, 59),
+                Cursor = Cursors.Hand,
+                Text = _t.OpenFolder
+            };
+            _openFolder.FlatAppearance.BorderSize = 0;
+            _openFolder.Click += (s, e) => OpenNotesFolder();
+            statusBar.Controls.Add(_saved);
+            statusBar.Controls.Add(_openFolder);
 
             _updateBar = new Panel { Dock = DockStyle.Top, Height = 40, BackColor = Color.FromArgb(124, 92, 246), Visible = false };
             _updateLink = new Button
@@ -247,7 +271,7 @@ namespace OutlookNotes
             // Add in reverse dock order (Fill first, outermost edges last).
             Controls.Add(_note);
             Controls.Add(attGroup);
-            Controls.Add(_saved);
+            Controls.Add(statusBar);
             Controls.Add(actions);
             Controls.Add(_header);
             Controls.Add(_updateBar);
@@ -429,6 +453,17 @@ namespace OutlookNotes
             string name = SelectedAttachmentName();
             if (name == null) return;
             try { System.Diagnostics.Process.Start(Path.Combine(_store.AttachmentsDir(_current.NoteId), name)); }
+            catch { }
+        }
+
+        /// <summary>Open the folder where all notes and attachments are stored.</summary>
+        private void OpenNotesFolder()
+        {
+            try
+            {
+                Directory.CreateDirectory(_store.RootDir);
+                System.Diagnostics.Process.Start(_store.RootDir);
+            }
             catch { }
         }
 
