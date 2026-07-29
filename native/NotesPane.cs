@@ -18,7 +18,7 @@ namespace OutlookNotes
     [ClassInterface(ClassInterfaceType.None)]
     public class NotesPane : UserControl
     {
-        private readonly Store _store = new Store();
+        private readonly Store _store;
 
         private Panel _updateBar;
         private Button _updateLink;
@@ -33,8 +33,8 @@ namespace OutlookNotes
         private Button _btnRemove;
         private Label _saved;
 
-        private readonly Timer _poll = new Timer();
-        private readonly Timer _saveTimer = new Timer();
+        private readonly Timer _poll;
+        private readonly Timer _saveTimer;
 
         private object _app;
         private string _mailKey;
@@ -42,11 +42,29 @@ namespace OutlookNotes
 
         public NotesPane()
         {
-            BuildUi();
-            _poll.Interval = 800;
-            _poll.Tick += (s, e) => Poll();
-            _saveTimer.Interval = 600;
-            _saveTimer.Tick += (s, e) => { _saveTimer.Stop(); FlushSave(); };
+            // Log the full lifecycle: if this control fails to be created as an
+            // ActiveX control, the presence/absence of these lines in addin.log
+            // tells us whether managed code ran at all and whether the ctor threw.
+            AddIn.Log("NotesPane.ctor: start");
+            try
+            {
+                _store = new Store();
+                AddIn.Log("NotesPane.ctor: store ok");
+                _poll = new Timer();
+                _saveTimer = new Timer();
+                BuildUi();
+                AddIn.Log("NotesPane.ctor: ui ok");
+                _poll.Interval = 800;
+                _poll.Tick += (s, e) => Poll();
+                _saveTimer.Interval = 600;
+                _saveTimer.Tick += (s, e) => { _saveTimer.Stop(); FlushSave(); };
+                AddIn.Log("NotesPane.ctor: done");
+            }
+            catch (Exception ex)
+            {
+                AddIn.Log("NotesPane.ctor FAILED: " + ex);
+                throw;
+            }
         }
 
         /// <summary>Called by the add-in once the Outlook Application is known.</summary>

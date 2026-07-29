@@ -8,7 +8,7 @@
 ; Output: Output\OutlookNotesSetup.exe
 
 #define AppName "Outlook-Notes"
-#define AppVersion "0.1.1"
+#define AppVersion "0.1.2"
 #define Publisher "Pixelschmied"
 #define AppUrl "https://github.com/Pixelschmied/Outlook-Notes"
 
@@ -20,8 +20,8 @@
 #define PaneProgId "OutlookNotes.NotesPane"
 #define ControlCat "{{40FC6ED4-2438-11CF-A3DB-080036F12502}"
 #define DotNetCat "{{62C8FE65-4EBB-45E7-B440-6E39B2CDBF29}"
-#define AsmFullName "OutlookNotesAddin, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null"
-#define AsmVer "0.1.1.0"
+#define AsmFullName "OutlookNotesAddin, Version=0.1.2.0, Culture=neutral, PublicKeyToken=null"
+#define AsmVer "0.1.2.0"
 #define CB "{code:CodeBase}"
 
 [Setup]
@@ -81,7 +81,7 @@ Root: HKCU; Subkey: "Software\Classes\{#AddinProgId}\CLSID"; ValueType: string; 
 ; --- Task-pane control ---
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}"; ValueType: string; ValueData: "{#PaneClass}"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"
-Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"
+Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Apartment"
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "{#PaneClass}"
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"
 Root: HKCU; Subkey: "Software\Classes\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"
@@ -118,7 +118,7 @@ Root: HKCU; Subkey: "Software\Classes\Wow6432Node\{#AddinProgId}\CLSID"; ValueTy
 ; --- Task-pane control ---
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}"; ValueType: string; ValueData: "{#PaneClass}"; Flags: uninsdeletekey; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueData: "mscoree.dll"; Check: IsWin64
-Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Both"; Check: IsWin64
+Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Apartment"; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Class"; ValueData: "{#PaneClass}"; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "Assembly"; ValueData: "{#AsmFullName}"; Check: IsWin64
 Root: HKCU; Subkey: "Software\Classes\Wow6432Node\CLSID\{#PaneClsid}\InprocServer32"; ValueType: string; ValueName: "RuntimeVersion"; ValueData: "v4.0.30319"; Check: IsWin64

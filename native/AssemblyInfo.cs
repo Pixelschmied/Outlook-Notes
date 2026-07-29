@@ -1,12 +1,12 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Email Notes for Outlook")]
-[assembly: AssemblyProduct("Email Notes")]
+[assembly: AssemblyTitle("Outlook-Notes")]
+[assembly: AssemblyProduct("Outlook-Notes")]
 [assembly: AssemblyCompany("Pixelschmied")]
 [assembly: AssemblyCopyright("MIT License")]
-[assembly: AssemblyVersion("0.1.1.0")]
-[assembly: AssemblyFileVersion("0.1.1.0")]
+[assembly: AssemblyVersion("0.1.2.0")]
+[assembly: AssemblyFileVersion("0.1.2.0")]
 
 // Individual classes opt in to COM; the assembly itself is not COM-visible.
 [assembly: ComVisible(false)]
