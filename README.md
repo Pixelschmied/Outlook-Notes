@@ -1,240 +1,136 @@
-# Email Notes for Outlook
+# Outlook-Notes
 
-A private notepad that docks **right next to your mail** in classic Outlook.
-Every mail is linked to its own note by a stable, sequential ID — the first mail
-you take notes on is **Note 1**, the next distinct mail is **Note 2**, and so on.
-Paste screenshots and attach files straight into the note. Nothing ever leaves
-your device.
+A private notepad that docks right next to your mail in **classic Outlook for
+Windows**. Every mail gets its own note, linked by a stable, sequential ID
+(Mail 1 = Note 1, Mail 2 = Note 2, …). Paste screenshots straight from the
+clipboard and attach files — like a sticky note for your inbox.
 
-This is the "email notes" idea from the internal Pixel-App, rebuilt so it lives
-inside Outlook itself.
-
-> **Independent, open-source project.** Not affiliated with, endorsed by, or
-> sponsored by Microsoft. See [Legal & Microsoft compliance](#legal--microsoft-compliance).
-
-## Two editions
-
-There are two builds of the add-in, because Outlook has two add-in models:
-
-| | **Native (recommended)** | **Web** |
-| --- | --- | --- |
-| Technology | COM add-in (.NET, WinForms) | Office.js web add-in |
-| Microsoft login / M365 | **not required** | required (M365/Exchange add-in platform) |
-| Internet | **not required** — fully offline | loads its UI over HTTPS |
-| Install | `EmailNotesSetup.exe`, per-user, no admin | sideload/deploy the manifest |
-| Best for | any classic Outlook, incl. locked-down/on-prem | Microsoft 365 mailboxes |
-
-If the web add-in never shows up (you see "Sign in" or "You have no apps"), your
-Outlook doesn't have the web add-in platform enabled — **use the native edition**.
+It runs **completely locally**: no Microsoft account, no sign-in, no internet,
+no cloud. Your notes never leave your computer. Installation is per-user and
+needs **no administrator rights**.
 
 ---
 
-## Install (native — one click, local, no login)
+## Install
 
 1. **Close Outlook.**
-2. **Download `EmailNotesSetup.exe`** from the
-   [latest release](https://github.com/Pixelschmied/Outlook-Notes/releases).
-3. **Run it.** No administrator rights needed — it installs just for you.
-   (Windows SmartScreen may warn about an unknown publisher because the installer
-   isn't code-signed; choose **More info → Run anyway**. See [Code signing](#code-signing).)
-4. **Start Outlook**, open any mail, and click **Notes** in the **Email Notes**
-   group on the Home ribbon. The notepad docks on the right, next to your mail.
+2. Download the latest **`OutlookNotesSetup.exe`** from the
+   [Releases page](https://github.com/Pixelschmied/Outlook-Notes/releases/latest).
+3. Run it. Windows SmartScreen may warn about an unknown publisher (the
+   installer is not code-signed) — choose **More info → Run anyway**.
+4. Start Outlook and click a mail. The notepad docks on the right.
 
-It runs completely locally — **no Microsoft login, no internet**. Notes and
-screenshots are stored only on your PC under `%APPDATA%\EmailNotes`. A log at
-`%APPDATA%\EmailNotes\addin.log` helps if the button doesn't appear.
+That's it. There is nothing else to configure, and no Node.js, developer tools
+or Office sign-in are required.
 
-To remove it: uninstall **Email Notes** from *Windows Settings → Apps*, then
-restart Outlook.
+## How it works
 
-### Automatic updates
+- **One note per mail.** The first time you select a mail, Outlook-Notes
+  creates an empty note and gives it the next sequential number. Re-selecting
+  the same mail always brings back the same note.
+- **Auto-save.** Whatever you type is saved automatically while you work.
+- **Screenshots.** Copy an image (e.g. `PrtScn` or the Snipping Tool), then
+  click **📋 Screenshot einfügen** or press `Ctrl+V` in the note. The image is
+  stored with the note and referenced inline.
+- **Attachments.** Click **📎 Datei anhängen** to attach any file. Double-click
+  an attachment to open it.
 
-At Outlook startup the add-in quietly checks GitHub for a newer release. If one
-exists, a bar appears at the top of the notepad — **"Neue Version … verfügbar –
-jetzt aktualisieren"**. Clicking it downloads the new installer and runs it (it
-closes Outlook, updates, and you reopen). The check is best-effort and
-offline-safe: with no internet, or if GitHub is blocked, nothing happens and the
-notepad keeps working locally.
+All data is stored locally under:
 
-## What it does
+```
+%APPDATA%\OutlookNotes\
+├─ notes.json            (your notes, keyed by the mail's Outlook EntryID)
+└─ attachments\<noteId>\ (screenshots and attached files)
+```
 
-- 📌 **Docks next to the mail.** A pinnable task pane on the message-read
-  surface that automatically switches to the note for whichever mail you select.
-- 🔗 **One note per mail, by a stable ID.** Each mail is matched to its note via
-  the mail's `internetMessageId`, which never changes when a mail is moved
-  between folders. See [How the linking works](#how-the-linking-works).
-- 📋 **Paste screenshots.** `Ctrl+V` an image into the note (or use **Paste
-  screenshot**) and it's stored as an attachment, with a `[📎 name]` reference
-  dropped into the text — exactly like the Pixel-App.
-- 📎 **Attach files.** Pick any file(s); they're kept with the note.
-- ✏️ **Manage attachments.** Open, rename, remove, and copy images back to the
-  clipboard.
-- 💾 **Autosave.** Typing is saved automatically (and immediately when you
-  switch mails or hide the pane).
-- 🔒 **Fully local & offline.** All notes and attachments live in the add-in's
-  local storage. There is no server, no account, no cloud.
+Because everything is a plain file on your machine, you can back it up or move
+it just by copying that folder.
 
-## How the linking works
+## Automatic updates
 
-The rule is simple: *every mail is linked to a note by a unique id — Mail 1 =
-Note 1, Mail 2 = Note 2, …*. Implementation:
+On every Outlook start, Outlook-Notes quietly checks GitHub for a newer
+release. If one exists, a banner appears at the top of the notepad:
 
-1. When you select a mail, the add-in reads a **stable mail key** — preferring
-   `internetMessageId` (globally unique, survives folder moves and restarts),
-   falling back to the item id / conversation id.
-2. A local registry maps `mailKey → noteId`. The **first** time a mail is seen
-   it's assigned the **next sequential number**, permanently — so the mail
-   always reopens the same note.
-3. The note text and attachments are stored under that `noteId`.
+> ⬆ Neue Version verfügbar – jetzt aktualisieren
 
-"Mail 1 = Note 1" means *the first mail you actually take notes on* becomes
-Note 1 — not a fixed position in your inbox.
+One click downloads and runs the new installer for you. If you're offline,
+nothing happens — no errors, no interruptions. After the first install you
+never have to update by hand again.
 
-## Privacy & data
+## Privacy
 
-- **Everything stays on your device.** Notes and attachments are stored in the
-  add-in's local IndexedDB. There is no backend, and the add-in makes no network
-  calls of its own.
-- The only external resource loaded is **office.js from Microsoft's CDN**, which
-  every Office add-in requires.
-- The add-in requests the minimum permission, **`ReadItem`**: it reads the
-  selected mail's id, subject, and sender to link and label the note. It does
-  **not** modify, move, send, or delete your mail.
-- Storage is local to the machine and Outlook profile, so notes are not synced
-  across devices.
+Outlook-Notes is fully offline by design. The **only** network request it ever
+makes is the version check against the public GitHub Releases API, and that
+sends no personal data. Your mails, notes, screenshots and attachments stay on
+your device.
 
-## Legal & Microsoft compliance
+## Uninstall
 
-Built to follow Microsoft's rules for Office/Outlook add-ins:
-
-- Uses the **official Office Add-ins platform** and a standard add-in manifest —
-  the supported, documented way to extend Outlook.
-- **office.js is loaded from the official Microsoft CDN**, never bundled or
-  repackaged.
-- **All add-in resource URLs are HTTPS.**
-- Requests the **least privilege** it needs (`ReadItem`).
-- **Installer footprint is minimal and per-user:** it writes only to your own
-  user profile — one value under `HKCU\Software\Microsoft\Office\16.0\WEF\Developer`
-  (Microsoft's documented Windows sideloading location) plus a copy of the
-  manifest in `%LOCALAPPDATA%`. No system files, no admin rights, fully removed
-  on uninstall.
-- **Trademarks.** "Microsoft", "Outlook", and "Office" are trademarks of
-  Microsoft Corporation. This is an **independent, unofficial** add-in and is
-  **not affiliated with, endorsed by, or sponsored by Microsoft**. The product
-  name ("Email Notes") uses no Microsoft brand names, and the icons are original.
-
-### Code signing
-
-The installer is currently **unsigned**, so Windows SmartScreen shows an
-"unknown publisher" prompt (**More info → Run anyway** to proceed). This is
-expected for an open-source project and does not mean the software is unsafe —
-you can review every line here and build it yourself. For wide distribution,
-sign `EmailNotesSetup.exe` with an Authenticode certificate.
-
-### Publishing to AppSource (optional)
-
-Listing an add-in on Microsoft AppSource requires passing Microsoft's
-[Commercial marketplace certification policies](https://learn.microsoft.com/legal/marketplace/certification-policies)
-and the
-[Office Store validation policies](https://learn.microsoft.com/office/dev/store/validation-policies).
-Sideloading or admin-deploying inside your own organization does **not** require
-certification. This repository targets self-hosting via the installer; review
-those policies before publishing.
+Uninstall **Outlook-Notes** from Windows Settings → **Apps**, then restart
+Outlook. Your notes under `%APPDATA%\OutlookNotes` are left in place; delete
+that folder too if you want to remove everything.
 
 ---
 
-## For maintainers: one-time setup
+## For developers
 
-The installer points the add-in at this project's GitHub Pages site, so the
-static files must be published once:
-
-1. In the repo, go to **Settings → Pages** and set **Source: GitHub Actions**.
-2. The [`pages`](.github/workflows/pages.yml) workflow builds and deploys
-   `dist/` to `https://pixelschmied.github.io/Outlook-Notes/` on every push to
-   `main`.
-3. The [`installer`](.github/workflows/installer.yml) workflow compiles
-   `EmailNotesSetup.exe` on a Windows runner and uploads it as a build artifact;
-   on a published GitHub Release it's attached as a downloadable asset.
-
-If you host somewhere other than GitHub Pages, set `PUBLIC_URL` when building the
-manifest (`PUBLIC_URL=https://your.host npm run manifest:prod`) and update the
-same value in the two workflows.
-
-## Build from source (contributors only)
-
-You only need this if you want to **modify the add-in** — end users just run the
-installer above.
-
-```bash
-npm install
-npm run dev-certs   # trust a local HTTPS certificate (Office requires HTTPS)
-npm start           # dev server on https://localhost:3000
-```
-
-Then sideload the dev `manifest.xml` (which points at `https://localhost:3000`)
-into Outlook: *File → Get Add-ins → My add-ins → Add a custom add-in → Add from
-file…*. See Microsoft's
-[sideloading guide](https://learn.microsoft.com/office/dev/add-ins/outlook/sideload-outlook-add-ins-for-testing).
-
-| Script | What it does |
-| --- | --- |
-| `npm start` | Dev server with hot reload on `https://localhost:3000` |
-| `npm run build` | Production build into `dist/` |
-| `npm run typecheck` | TypeScript type-check |
-| `npm run manifest:prod` | Write `dist/manifest.xml` for your `PUBLIC_URL` host |
-| `npm run validate` | Validate `manifest.xml` (Microsoft's online validator) |
-| `npm run make-icons` | Regenerate the PNG icons in `assets/` |
-| `npm run make-installer-art` | Regenerate the installer artwork + `app.ico` |
-
-Building the installer locally (on Windows) needs
-[Inno Setup 6+](https://jrsoftware.org/isinfo.php):
-
-```bash
-npm run build
-npm run make-installer-art
-npm run manifest:prod
-ISCC installer\EmailNotes.iss   # → installer\Output\EmailNotesSetup.exe
-```
-
-## Project structure
+Outlook-Notes is a native COM add-in for classic Outlook, written in C# against
+.NET Framework 4.8 using [NetOffice](https://github.com/NetOfficeFw/NetOffice)
+for the add-in plumbing. The docked notepad is a WinForms control hosted in an
+Outlook Custom Task Pane. There is no web view and no Office.js.
 
 ```
-Outlook-Notes/
-├─ manifest.xml               # Dev manifest (localhost); prod copy is stamped into dist/
-├─ assets/                    # Generated PNG icons + app.ico
-├─ installer/
-│  ├─ EmailNotes.iss          # Inno Setup script (per-user sideload registration)
-│  ├─ after.txt               # Post-install instructions shown in the wizard
-│  └─ wizard-*.bmp            # Generated wizard artwork
-├─ scripts/
-│  ├─ make-icons.mjs          # Icon generator (no image libraries)
-│  ├─ make-installer-art.mjs  # Installer artwork + .ico generator
-│  └─ build-manifest.mjs      # Stamps the public host into dist/manifest.xml
-├─ src/
-│  ├─ core/                   # Storage + logic (db, mail key, attachments, types)
-│  ├─ taskpane/               # Notepad UI (HTML/CSS/TS)
-│  └─ commands/               # Ribbon function file
-└─ .github/workflows/         # build, pages (host), installer (.exe)
+native/                 The add-in
+├─ AddIn.cs             NetOffice COMAddin: ribbon + task-pane wiring
+├─ NotesPane.cs         WinForms notepad (UI, clipboard paste, attachments)
+├─ Store.cs             Local JSON storage + sequential IDs
+├─ Updater.cs           GitHub-release update check
+├─ AssemblyInfo.cs      Version of the DLL
+└─ OutlookNotesAddin.csproj
+installer/
+├─ OutlookNotes.iss     Inno Setup script (per-user HKCU COM registration)
+├─ after.txt            Post-install notes
+└─ wizard-*.bmp         Installer artwork
+.github/workflows/
+├─ installer.yml        Build the DLL + installer and publish a Release
+└─ cleanup-releases.yml One-off: delete all releases + tags
 ```
 
-## Requirements
+### Build locally (Windows)
 
-- Classic Outlook for Windows (desktop), Microsoft 365 / Exchange account.
-- Mailbox **1.5** requirement set (add-in commands + task-pane pinning), which
-  classic Outlook has supported for years.
+```powershell
+dotnet build native/OutlookNotesAddin.csproj -c Release
+# Inno Setup 6 must be installed:
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\OutlookNotes.iss
+# → installer\Output\OutlookNotesSetup.exe
+```
 
-## Not included (yet)
+### Cut a release
 
-To keep this a clean standalone add-in, the Pixel-App's integrations (GitLab
-issues, the shared To-Do board) are intentionally left out — they depend on that
-app's own backend. The core email-notes experience (per-mail notes, sequential
-linking, screenshots, attachments) is complete.
+Releases are built on a Windows runner in GitHub Actions. To publish one:
 
-## Contributing
+1. Bump the version in **`native/AssemblyInfo.cs`** and
+   **`installer/OutlookNotes.iss`** (`AppVersion`, `AsmFullName`, `AsmVer`).
+2. Push, then run the **installer** workflow
+   (Actions → *installer* → **Run workflow**) with the tag, e.g. `v0.2.0`, and
+   *Create release* enabled.
 
-Issues and pull requests welcome. Please keep documentation in English and run
-`npm run typecheck` and `npm run build` before submitting.
+The workflow builds `OutlookNotesSetup.exe`, attaches it to a new GitHub
+Release, and marks it as *latest* — which is what the in-app auto-updater
+picks up.
+
+## Legal & compliance
+
+Outlook-Notes is an unofficial, independent project. It is **not** affiliated
+with, endorsed by, or sponsored by Microsoft. "Outlook", "Microsoft" and
+related marks belong to Microsoft Corporation and are used only to describe
+interoperability.
+
+The add-in uses documented, supported extensibility points (a COM add-in with a
+Custom Task Pane via the Outlook object model). It reads only the currently
+selected mail's metadata to link a note to it, stores everything locally, and
+transmits no user data.
 
 ## License
 
-[MIT](./LICENSE) © Pixelschmied
+[MIT](LICENSE) © Pixelschmied

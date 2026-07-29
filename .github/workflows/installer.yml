@@ -19,7 +19,7 @@ on:
         type: boolean
         default: true
       version:
-        description: 'Release tag, e.g. v0.2.1 (blank = version from package.json)'
+        description: 'Release tag, e.g. v0.2.1 (blank = version from OutlookNotes.iss)'
         type: string
         default: ''
   release:
@@ -67,8 +67,12 @@ jobs:
             if ("${{ github.ref_type }}" -eq "tag") {
               $v = "${{ github.ref_name }}"
             } else {
-              $pkg = Get-Content package.json -Raw | ConvertFrom-Json
-              $v = "v$($pkg.version)"
+              $iss = Get-Content installer/OutlookNotes.iss -Raw
+              if ($iss -match '#define\s+AppVersion\s+"([^"]+)"') {
+                $v = "v$($matches[1])"
+              } else {
+                throw "Could not find AppVersion in installer/OutlookNotes.iss"
+              }
             }
           }
           "tag=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append

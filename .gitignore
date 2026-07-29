@@ -1,12 +1,12 @@
+# Dependencies & build output
 node_modules/
 dist/
-installer/Output/
 native/bin/
 native/obj/
+installer/Output/
+
+# Logs & OS/editor cruft
 *.log
-npm-debug.log*
 .DS_Store
 .vscode/
 .idea/
-# Local HTTPS dev certificates
-*.pem
